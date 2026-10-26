@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+/* Paleta i pravila primene - od Luke 26.10.2026 (docs/PALETA.md) */
+:root {
+  --brand-primary: #f5c518;
+  --brand-primary-hover: #e5b510;
+  --brand-primary-active: #c99b08;
+  --brand-primary-soft: #fff8da;
+  --brand-on-primary: #202124;
+
+  --background: #f7f8fa;
+  --surface: #ffffff;
+  --text-primary: #202124;
+  --text-secondary: #62666d;
+  --border-subtle: #e2e4e8;
+  --border-input: #858a93;
+
+  --success: #167347;
+  --error: #b42318;
+  --sale: #b42318;
+  --warning: #855b00;
+  --info: #2457c5;
+  --focus-ring: #2457c5;
+
+  --disabled-background: #e2e4e8;
+  --disabled-text: #62666d;
+}
+
+@theme inline {
+  --color-brand: var(--brand-primary);
+  --color-brand-hover: var(--brand-primary-hover);
+  --color-brand-active: var(--brand-primary-active);
+  --color-brand-soft: var(--brand-primary-soft);
+  --color-on-brand: var(--brand-on-primary);
+  --color-page: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-subtle: var(--border-subtle);
+  --color-input: var(--border-input);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-sale: var(--sale);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-disabled: var(--disabled-background);
+  --font-sans: var(--font-instrument), "Instrument Sans", Helvetica, Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  background: var(--background);
+  color: var(--text-primary);
+  min-width: 320px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a,
+button,
+[role="button"],
+label,
+select,
+summary,
+input[type="checkbox"] {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Wrapper kao pitbike.vercel.app: max-width 1600, padding 36 px */
+.container-site {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+@media (min-width: 768px) {
+  .container-site {
+    padding-inline: 36px;
+  }
+}
+
+/* Tipografija sekcija (Pitbike): h2 40/500, h3 20/500, pasus 14/21 sekundarna, nadnaslov 14 */
+.h-section {
+  font-size: 34px;
+  line-height: 38px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+@media (min-width: 768px) {
+  .h-section {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+.h-card {
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: 500;
+}
+.p-muted {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-secondary);
+}
+.eyebrow {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+/* Naslov grupe kategorija (Fristads blok iz prethodne verzije), prilagođen Instrument Sans-u */
+.section-title {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-align: center;
+}
+@media (min-width: 768px) {
+  .section-title {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
+.kicker {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Dugmad: pilula 41 px (Pitbike), boje po paleti */
+.btn-primary,
+.btn-secondary,
+.btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 41px;
+  padding: 0 32px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn-primary {
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+}
+.btn-primary:hover {
+  background: var(--brand-primary-hover);
+}
+.btn-primary:active {
+  background: var(--brand-primary-active);
+}
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+}
+.btn-secondary:hover {
+  background: var(--brand-primary-soft);
+}
+.btn-dark {
+  background: var(--text-primary);
+  color: #fff;
+}
+.btn-dark:hover {
+  background: #3a3d42;
+}
+/* Tekstualni link sa strelicom (Pitbike „Entdecken ›") */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.link-arrow svg {
+  transition: transform 0.2s;
+}
+.link-arrow:hover svg {
+  transform: translateX(3px);
+}
+.link-arrow.on-dark {
+  color: #fff;
+}
+
+/* Hero: blagi ulazak teksta pri smeni slajda */
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-in {
+  animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Mobilni meni (pitbike.vercel.app 1:1): panel ulazi fade + 16 px odozgo, 500 ms, expo-out;
+   sadržaj harmonike ulazi fade + 14 px, 450 ms ease-out pri otvaranju */
+.menu-panel {
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu-panel-closed {
+  opacity: 0;
+  transform: translateY(-16px);
+}
+.menu-panel-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.menu-in {
+  animation: menu-in 0.45s ease-out both;
+}
