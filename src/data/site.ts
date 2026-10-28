@@ -3,6 +3,8 @@
 
 export const contact = {
   name: "HTZ Shop",
+  // poslovno ime iz APR-a (preduzetnik), za obrasce, podatke prodavca i JSON-LD
+  legalName: "TANJA MARJANOVIĆ PR TRGOVINSKA RADNJA HTZ SHOP SVILAJNAC",
   address: "Karađorđeva 24",
   city: "35210 Svilajnac",
   phone: "035/88-15-322",
@@ -17,12 +19,16 @@ export const contact = {
   ],
   pib: "110276071",
   mb: "64777858",
-  bank: "Banca Intesa 160-492241-81",
+  // Račun u Banca Intesi (160-492241-81) je ugašen 6. 6. 2026; aktivni računi su u Raiffeisen banci. Dok firma ne potvrdi
+  // koji je za uplate kupaca, sajt ne prikazuje račun. Format: „Naziv banke broj-računa".
+  bank: "",
   founded: 2017,
   facebook: "https://www.facebook.com/profile.php?id=100064679481924",
   instagram: "https://instagram.com/htz_oprema_Shop",
   freeShippingFrom: "8.000 RSD",
   totalProducts: 359,
+  // Radnja na mapi (Karađorđeva 24, OpenStreetMap). Ako se adresa u adminu promeni, treba promeniti i ovo.
+  coords: { lat: 44.23167, lng: 21.2008 },
 };
 
 export type Category = {
@@ -197,21 +203,22 @@ export const brands: { name: string; slug: string; logo: string }[] = [
   { name: "Stanmore", slug: "stanmore", logo: "/images/brands/stanmore.png" },
 ];
 
+// Tehnike i opisi sa originalne stranice „Brendiranje odeće" (htzshop.rs); `za` je sažetak istog opisa za stranicu brendiranja
 export const printMethods = [
-  { name: "Sito štampa", text: "Najpopularniji vid brendiranja tekstila. Postojan, dugotrajan i kvalitetan otisak, idealan za veće serije." },
-  { name: "Flex štampa", text: "Tanka poliuretanska folija visoke postojanosti. Štampa u jednoj ili dve boje, oštre ivice logotipa." },
-  { name: "DTF štampa", text: "Za sve vrste odeće, torbi i uniformi. Ultra tanak otisak koji je rastegljiv i postojan na pranje." },
+  { name: "Sito štampa", text: "Najpopularniji vid brendiranja tekstila. Postojan, dugotrajan i kvalitetan otisak, idealan za veće serije.", za: "Veće serije" },
+  { name: "Flex štampa", text: "Tanka poliuretanska folija visoke postojanosti. Štampa u jednoj ili dve boje, oštre ivice logotipa.", za: "Logo u jednoj ili dve boje" },
+  { name: "DTF štampa", text: "Za sve vrste odeće, torbi i uniformi. Ultra tanak otisak koji je rastegljiv i postojan na pranje.", za: "Odeća, torbe i uniforme" },
 ];
 
 export const footerLinks = {
   info: [
     { name: "Plaćanje i isporuka", href: "/placanje-i-isporuka/" },
-    { name: "Uputstvo za naručivanje", href: "/uputstvo-za-narucivanje/" },
+    { name: "Kako naručiti", href: "/kako-naruciti/" },
     { name: "Pravo na odustajanje", href: "/pravo-na-odustajanje/" },
     { name: "Reklamacija proizvoda", href: "/reklamacija-proizvoda/" },
-    { name: "Povraćaj novca", href: "/povracaj-novca/" },
+    { name: "Povraćaj novca i robe", href: "/povracaj-novca/" },
     { name: "Politika privatnosti", href: "/politika-privatnosti/" },
-    { name: "Izjava o odricanju od odgovornosti", href: "/izjava-o-odricanju-od-odgovornosti/" },
+    { name: "Uslovi korišćenja", href: "/uslovi-koriscenja/" },
   ],
   shop: [
     { name: "Prodavnica", href: "/prodavnica/" },
@@ -294,7 +301,8 @@ export const categoryGroups: CategoryGroup[] = [
   },
 ];
 
-// Hero slajder: smenjuju se najjače kategorije sa opisom (uzor fristads.com)
+// Hero slajder: smenjuju se najjače kategorije sa opisom (uzor fristads.com).
+// Slajdovi se unose u admin panelu (Podešavanja → Baneri) i stižu preko API-ja (lib/api.ts).
 export type HeroSlide = {
   key: string;
   label: string;
@@ -306,66 +314,9 @@ export type HeroSlide = {
   image: string;
   imageAlt: string;
   imagePosition?: string;
+  // Prelaz odozdo nagore iza teksta (CSS background, boja i jačina iz admina)
+  fade: string;
 };
-
-export const heroSlides: HeroSlide[] = [
-  {
-    key: "odeca",
-    label: "Odeća",
-    eyebrow: "Zaštitna i radna odeća · 60 artikala",
-    title: "Radna odeća koja izdrži smenu.",
-    text: "Bluze, pantalone i polukombinezoni od Cerve, Emertona i Desmana. Sve veličine na lageru u Svilajncu, brendiranje vašim logom po želji.",
-    cta: { label: "Pogledaj odeću", href: "/kategorija-proizvoda/zastitna-i-radna-odeca/" },
-    secondary: { label: "Brendiranje", href: "/brendiranje-odece/" },
-    image: "/images/photo/slide-odeca.jpg",
-    imageAlt: "Radnik sa pojasom za alat",
-    imagePosition: "center 42%",
-  },
-  {
-    key: "obuca",
-    label: "Obuća",
-    eyebrow: "Zaštitna i radna obuća · 72 artikla",
-    title: "Antares S1 i još 71 model.",
-    text: "Cipele sa čeličnom kapom, duboke cipele, čizme i kaljače. Klase S1, S3, HRO i SRC, za gradilište, pogon i magacin.",
-    cta: { label: "Pogledaj obuću", href: "/kategorija-proizvoda/zastitna-i-radna-obuca/" },
-    image: "/images/photo/slide-obuca.jpg",
-    imageAlt: "Zaštitne čizme na gradilištu",
-    imagePosition: "center 60%",
-  },
-  {
-    key: "rukavice",
-    label: "Rukavice",
-    eyebrow: "Zaštitne i radne rukavice · 77 artikala",
-    title: "77 vrsta rukavica. Od 65 dinara.",
-    text: "Radne, zaštitne, protiv prosecanja i za zavarivanje. Za pojedince i za firme, u pakovanjima.",
-    cta: { label: "Pogledaj rukavice", href: "/kategorija-proizvoda/zastitne-i-radne-rukavice/" },
-    image: "/images/photo/slide-rukavice.jpg",
-    imageAlt: "Radnik u zaštitnim rukavicama vezuje armaturu",
-    imagePosition: "center 45%",
-  },
-  {
-    key: "zastita",
-    label: "Lična zaštita",
-    eyebrow: "Lična zaštita · glava, oči, disajni organi, sluh",
-    title: "Zaštita glave, očiju i sluha.",
-    text: "Šlemovi 3M, naočare i viziri, maske sa filterima, antifoni Peltor. Sve sertifikovano po EN standardima.",
-    cta: { label: "Pogledaj zaštitu", href: "/kategorija-proizvoda/zastita-glave/" },
-    image: "/images/photo/slide-zastita.jpg",
-    imageAlt: "Radnik sa zaštitnim naočarima i brusilicom",
-    imagePosition: "62% 78%",
-  },
-  {
-    key: "zavarivanje",
-    label: "Zavarivanje",
-    eyebrow: "Zaštita za zavarivanje · 18 artikala",
-    title: "Oprema za zavarivače.",
-    text: "Automatske maske Climax, vatrootporne bluze i pantalone Coen, kožne rukavice. Komplet za varioca na jednom mestu.",
-    cta: { label: "Pogledaj ponudu", href: "/kategorija-proizvoda/zastita-za-zavarivanje/" },
-    image: "/images/photo/slide-zavarivanje.jpg",
-    imageAlt: "Varilac sa varnicama",
-    imagePosition: "center 38%",
-  },
-];
 
 // Mega-meni po uzoru na pitbike.vercel.app: velika slika, naziv, podnaslov, dugme + link, na dnu link „Sve …"
 export type MegaItem = { name: string; sub: string; image: string; href: string };

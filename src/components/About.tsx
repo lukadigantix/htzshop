@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { aboutStats, contact, mapsHref } from "@/data/site";
 import { Clock, Pin } from "./Icons";
+import Razdvajac from "./Razdvajac";
 
 /*
   O nama / prodavnica: bela kartica levo (naslov, tekst, četiri brojke, adresa, dugmad),
@@ -35,7 +36,8 @@ export default function About() {
                 {contact.address}, {contact.city}
               </p>
               <p className="mt-0.5 text-[14px] text-secondary">
-                <a href={contact.phoneHref} className="hover:text-primary">{contact.phone}</a> ·{" "}
+                <a href={contact.phoneHref} className="hover:text-primary">{contact.phone}</a>
+                <Razdvajac />
                 <a href={`mailto:${contact.email}`} className="hover:text-primary">{contact.email}</a>
               </p>
             </div>

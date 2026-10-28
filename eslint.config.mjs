@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // shadcn/mapcn komponente iz registra (ne menjamo ih ručno)
+    "src/components/ui/**",
   ]),
 ]);
 

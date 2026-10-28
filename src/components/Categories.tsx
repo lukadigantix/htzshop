@@ -52,7 +52,7 @@ function Group({ g }: { g: CategoryGroup }) {
 
 export default function Categories() {
   return (
-    <section id="kategorije" className="space-y-16 bg-white py-14 md:space-y-[96px] md:py-[72px]">
+    <section id="kategorije" className="space-y-16 bg-white pt-14 md:space-y-[96px] md:pt-[72px]">
       {categoryGroups.map((g) => (
         <Group key={g.key} g={g} />
       ))}

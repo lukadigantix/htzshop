@@ -1,4 +1,19 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/* data-open / data-closed za Radix (data-state) - isto kao shadcn/tailwind.css na klikdogume, za modal pretrage */
+@custom-variant data-open {
+  &:where([data-state="open"]),
+  &:where([data-open]:not([data-open="false"])) {
+    @slot;
+  }
+}
+@custom-variant data-closed {
+  &:where([data-state="closed"]),
+  &:where([data-closed]:not([data-closed="false"])) {
+    @slot;
+  }
+}
 
 /* Paleta i pravila primene - od Luke 26.10.2026 (docs/PALETA.md) */
 :root {
@@ -45,6 +60,40 @@
   --color-info: var(--info);
   --color-disabled: var(--disabled-background);
   --font-sans: var(--font-instrument), "Instrument Sans", Helvetica, Arial, sans-serif;
+
+  /* shadcn nazivi boja koje koristi mapcn (components/ui/map.tsx), vezani za HTZ paletu */
+  --color-background: var(--surface);
+  --color-foreground: var(--text-primary);
+  --color-muted: var(--background);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--background);
+  --color-accent-foreground: var(--text-primary);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text-primary);
+  --color-border: var(--border-subtle);
+  --color-ring: var(--focus-ring);
+}
+
+/* mapcn: popup i atribucija bez MapLibre podrazumevanog izgleda (iz registra @mapcn/map) */
+@layer base {
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply bg-background! text-muted-foreground! border-border! rounded-md! border! shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply bg-transparent!;
+  }
 }
 
 html {
@@ -74,6 +123,12 @@ input[type="checkbox"] {
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
+}
+
+/* polje u modalu pretrage: cela bela traka je polje, okvir oko samog inputa bi bio višak */
+[cmdk-input]:focus-visible,
+.polje:focus-visible {
+  outline: none;
 }
 
 /* Wrapper kao pitbike.vercel.app: max-width 1600, padding 36 px */
@@ -235,4 +290,315 @@ input[type="checkbox"] {
 }
 .menu-in {
   animation: menu-in 0.45s ease-out both;
+}
+
+/* HTML iz editora u adminu (opis i prednosti proizvoda) */
+.prose-htz {
+  font-size: 15px;
+  line-height: 25px;
+  color: var(--text-secondary);
+}
+.prose-htz > * + * {
+  margin-top: 14px;
+}
+.prose-htz h2,
+.prose-htz h3,
+.prose-htz h4 {
+  margin-top: 24px;
+  font-size: 17px;
+  line-height: 26px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.prose-htz strong,
+.prose-htz b {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.prose-htz ul,
+.prose-htz ol {
+  padding-left: 20px;
+}
+.prose-htz ul {
+  list-style: disc;
+}
+.prose-htz ol {
+  list-style: decimal;
+}
+.prose-htz li + li {
+  margin-top: 6px;
+}
+.prose-htz li::marker {
+  color: var(--brand-primary-active);
+}
+.prose-htz a {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Traka upozorenja u footeru: sadržaj je dupliran, pa pomeranje za pola širine daje beskonačnu traku */
+@keyframes traka {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.traka-tece {
+  animation: traka 48s linear infinite;
+}
+.traka:hover .traka-tece {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .traka-tece {
+    animation: none;
+  }
+}
+
+/* ---------- Preloader (components/Preloader.tsx) ---------- */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #18191b;
+  animation: pl-izlaz 0.75s cubic-bezier(0.76, 0, 0.24, 1) 2.05s forwards;
+}
+/* šrafura na donjoj ivici panela - vidi se dok roletna ide nagore */
+.preloader::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -14px;
+  height: 14px;
+  background: repeating-linear-gradient(-45deg, var(--brand-primary) 0 12px, #202124 12px 24px);
+}
+@keyframes pl-izlaz {
+  to {
+    transform: translateY(calc(-100% - 14px));
+    visibility: hidden;
+  }
+}
+.pl-sadrzaj {
+  animation: pl-sadrzaj 0.45s cubic-bezier(0.7, 0, 0.84, 0) 1.95s forwards;
+}
+@keyframes pl-sadrzaj {
+  to {
+    transform: translateY(-48px);
+    opacity: 0;
+  }
+}
+.pl-obris {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pl-crtaj 0.8s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards;
+}
+@keyframes pl-crtaj {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.pl-ispuna {
+  clip-path: inset(100% 0 0 0);
+  animation: pl-puni 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
+}
+@keyframes pl-puni {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.pl-odsjaj {
+  opacity: 0.55;
+  animation: pl-odsjaj 0.7s cubic-bezier(0.45, 0, 0.55, 1) 1.2s forwards;
+}
+@keyframes pl-odsjaj {
+  to {
+    transform: skewX(-20deg) translateX(620px);
+  }
+}
+.pl-slovo {
+  transform: translateY(240px);
+  animation: pl-slovo 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes pl-slovo {
+  to {
+    transform: translateY(0);
+  }
+}
+.pl-napredak {
+  transform: scaleX(0);
+  transform-origin: left;
+  background-image: linear-gradient(-45deg, var(--brand-primary) 25%, #2b2c2f 25%, #2b2c2f 50%, var(--brand-primary) 50%, var(--brand-primary) 75%, #2b2c2f 75%);
+  background-size: 14px 14px;
+  animation:
+    pl-napredak 1.55s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards,
+    pl-sare 0.5s linear infinite;
+}
+@keyframes pl-napredak {
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes pl-sare {
+  to {
+    background-position: 14px 0;
+  }
+}
+.pl-natpis {
+  opacity: 0;
+  letter-spacing: 0.42em;
+  animation: pl-natpis 0.9s cubic-bezier(0.16, 1, 0.3, 1) 1.15s forwards;
+}
+@keyframes pl-natpis {
+  to {
+    opacity: 1;
+    letter-spacing: 0.22em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .preloader {
+    animation: pl-fade 0.3s ease 0.5s forwards;
+  }
+  .preloader::after {
+    display: none;
+  }
+  .pl-sadrzaj,
+  .pl-obris,
+  .pl-ispuna,
+  .pl-odsjaj,
+  .pl-slovo,
+  .pl-napredak,
+  .pl-natpis {
+    animation: none;
+  }
+  .pl-obris {
+    stroke-dashoffset: 0;
+  }
+  .pl-ispuna {
+    clip-path: none;
+  }
+  .pl-odsjaj {
+    display: none;
+  }
+  .pl-slovo {
+    transform: none;
+  }
+  .pl-napredak {
+    transform: none;
+  }
+  .pl-natpis {
+    opacity: 1;
+    letter-spacing: 0.22em;
+  }
+}
+@keyframes pl-fade {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Gornja traka: nova poruka klizne odozdo */
+@keyframes tb-poruka {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.tb-poruka {
+  animation: tb-poruka 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-poruka {
+    animation: none;
+  }
+}
+
+/* ---------- 404 (app/not-found.tsx) ---------- */
+/* ulaz kreće kad se preloader povuče (pri punom učitavanju), a odmah kad se na 404 stigne klikom (bez preloadera) */
+:root {
+  --n4-pre: 0s;
+}
+body:has(.preloader) {
+  --n4-pre: 2.45s;
+}
+@keyframes n4-ulaz {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* --n4-d: redosled pojavljivanja, zadaje ga strana */
+.n4-ulaz {
+  animation: n4-ulaz 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--n4-pre) + var(--n4-d, 0s));
+}
+/* štit umesto nule: padne odozgo, blago odskoči i ostane */
+.n4-stit {
+  animation: n4-stit 1.1s both;
+  animation-delay: calc(var(--n4-pre) + 0.3s);
+}
+@keyframes n4-stit {
+  0% { opacity: 0; transform: translateY(-70%) rotate(-12deg); animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+  45% { opacity: 1; transform: translateY(0) rotate(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.4, 1); }
+  65% { transform: translateY(-9%) rotate(2deg); animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.5); }
+  82% { transform: translateY(0) rotate(0); }
+  91% { transform: translateY(-2%); }
+  100% { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .n4-ulaz,
+  .n4-stit {
+    animation: none;
+  }
+}
+
+/* Bedž korpe u zaglavlju: kratko „iskoči" kad se broj promeni (Header.tsx, key = broj) */
+@keyframes korpa-bedz {
+  0% { transform: scale(0.4); }
+  60% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.korpa-bedz {
+  animation: korpa-bedz 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .korpa-bedz {
+    animation: none;
+  }
+}
+
+/* Potvrda porudžbine: žuta kvačica „klikne" na mesto (components/korpa/Potvrda.tsx) */
+@keyframes potvrda-kvacica {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.12); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.potvrda-kvacica {
+  animation: potvrda-kvacica 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .potvrda-kvacica {
+    animation: none;
+  }
+}
+
+/* Štampa (i PDF uslova, docs/obrasci/uslovi-pdf.mjs): bela strana, boje kako jesu, bez Next oznake razvojnog režima */
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 18mm 18mm;
+  }
+  :root {
+    --background: #fff;
+  }
+  html,
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  nextjs-portal {
+    display: none !important;
+  }
+  .container-site {
+    padding-inline: 0 !important;
+    max-width: none !important;
+  }
 }
