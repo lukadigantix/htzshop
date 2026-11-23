@@ -8,16 +8,18 @@ type Upit = Record<string, string | string[] | undefined>;
 
 /**
  * Lista prodavnice (server): filteri iz URL-a → GET /products + GET /filters → okvir sa filterima, mreža kartica i strane.
- * Koriste je /prodavnica, strana grupe (grupa zaključana putanjom) i strana brenda (brend zaključan putanjom).
+ * Koriste je /prodavnica, strana grupe (grupa zaključana putanjom), strana brenda (brend zaključan putanjom) i /pretraga
+ * (tekst iz ?q=, sužava artikle i filtere).
  */
-export default async function Lista({ searchParams, grupa, brend }: { searchParams: Promise<Upit>; grupa?: string; brend?: string }) {
+export default async function Lista({ searchParams, grupa, brend, pretraga = false }: { searchParams: Promise<Upit>; grupa?: string; brend?: string; /** strana /pretraga/: tekst iz ?q= */ pretraga?: boolean }) {
   const sp = await searchParams;
+  const trazi = pretraga && typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "";
   const f = filteriIzUrl(sp);
   if (grupa) f.grupa = [grupa];
   if (brend) f.brend = [brend];
   const sort = sortIzUrl(typeof sp.sort === "string" ? sp.sort : undefined);
   const strana = Math.max(1, Number(typeof sp.strana === "string" ? sp.strana : 1) || 1);
-  const k = await getKatalog(f, sort, strana);
+  const k = await getKatalog(f, sort, strana, trazi || undefined);
 
   const upit = new URLSearchParams();
   for (const [key, v] of Object.entries(sp)) if (typeof v === "string") upit.set(key, v);

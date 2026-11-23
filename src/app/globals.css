@@ -35,7 +35,7 @@
   --sale: #b42318;
   --warning: #855b00;
   --info: #2457c5;
-  --focus-ring: #2457c5;
+  --focus-ring: #202124;
 
   --disabled-background: #e2e4e8;
   --disabled-text: #62666d;
@@ -125,7 +125,11 @@ input[type="checkbox"] {
   outline-offset: 3px;
 }
 
-/* polje u modalu pretrage: cela bela traka je polje, okvir oko samog inputa bi bio višak */
+/* Polja za kucanje imaju svoj fokus (tamni okvir i žuti sjaj na samom polju ili njegovoj traci), pa plavi obris ne treba;
+   ostaje za dugmad, linkove i kvadratiće, zbog kretanja tastaturom */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus-visible,
+textarea:focus-visible,
+select:focus-visible,
 [cmdk-input]:focus-visible,
 .polje:focus-visible {
   outline: none;
@@ -264,6 +268,40 @@ input[type="checkbox"] {
   animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/*
+  Traka za pomeranje na celom sajtu (strana, pretraga, meniji, filteri): ista kao u admin panelu - tanka, zaobljena,
+  sa razmakom oko klizača, na prelaz mišem žuta. Firefox dobija tanku traku u istim bojama; Chrome i Safari je crtaju
+  preko ::-webkit-scrollbar. .no-scrollbar (vodoravne trake sa prevlačenjem) ima prednost.
+*/
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 33, 36, 0.24) transparent;
+}
+@supports selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-track,
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: rgba(32, 33, 36, 0.2);
+}
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active {
+  background-color: var(--brand-primary);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -290,6 +328,14 @@ input[type="checkbox"] {
 }
 .menu-in {
   animation: menu-in 0.45s ease-out both;
+}
+/* mega-meni: promena grupe prelazom miša - kratko, da ne kasni za mišem */
+@keyframes menu-prelaz {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.menu-prelaz {
+  animation: menu-prelaz 0.18s ease-out both;
 }
 
 /* HTML iz editora u adminu (opis i prednosti proizvoda) */
@@ -335,6 +381,63 @@ input[type="checkbox"] {
   color: var(--text-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+/* opis počinje bez razmaka iznad */
+.prose-htz > :first-child {
+  margin-top: 0;
+}
+/* naslov je bliže svom sadržaju nego prethodnom */
+.prose-htz h3 + *,
+.prose-htz h4 + * {
+  margin-top: 10px;
+}
+.prose-htz .napomena {
+  font-size: 13px;
+  line-height: 20px;
+}
+/* Tabele iz opisa (lib/opis.ts): „kv" kao Tehnički podaci (ključ – vrednost), „mere" kao tabela veličina */
+.prose-htz .opis-tabela {
+  overflow-x: auto;
+}
+.prose-htz table {
+  width: 100%;
+  border-collapse: collapse;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 14px;
+  line-height: 22px;
+}
+.prose-htz td,
+.prose-htz th {
+  padding: 11px 16px 11px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+.prose-htz td:last-child,
+.prose-htz th:last-child {
+  padding-right: 0;
+}
+.prose-htz table.kv td:first-child {
+  width: 40%;
+  min-width: 120px;
+}
+.prose-htz table.kv td + td {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.prose-htz table.mere {
+  width: auto;
+  min-width: min(100%, 360px);
+  font-variant-numeric: tabular-nums;
+}
+.prose-htz table.mere th {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.prose-htz table.mere td:first-child {
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 /* Traka upozorenja u footeru: sadržaj je dupliran, pa pomeranje za pola širine daje beskonačnu traku */
@@ -601,4 +704,20 @@ body:has(.preloader) {
     padding-inline: 0 !important;
     max-width: none !important;
   }
+}
+
+/* „Dodato u korpu": traka koja pokazuje koliko još obaveštenje stoji; staje dok je miš na njemu */
+@keyframes dodato-tajmer {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+.dodato-tajmer {
+  transform-origin: left;
+  animation: dodato-tajmer 6s linear forwards;
+}
+.dodato:hover .dodato-tajmer {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dodato-tajmer { animation: none; }
 }

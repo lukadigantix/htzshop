@@ -91,7 +91,7 @@ function Polje({ label, value, onChange, onCommit }: { label: string; value: str
             (e.target as HTMLInputElement).blur();
           }
         }}
-        className="polje h-10 w-full rounded-[4px] border border-subtle bg-page pl-3 pr-10 text-[14px] font-medium tabular-nums outline-none transition focus:border-primary focus:bg-surface"
+        className="polje h-10 w-full rounded-[8px] border border-subtle bg-page pl-3 pr-10 text-[14px] font-medium tabular-nums outline-none transition focus:border-primary focus:bg-surface"
       />
       <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-secondary" aria-hidden>
         RSD

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Naplata from "@/components/korpa/Naplata";
-import { contact } from "@/data/site";
 import { getKorpa, getKupon, obracunajKorpu, PORUKA_MREZA } from "@/lib/korpa";
 import { getAdrese, getKorisnik } from "@/lib/nalog";
 import { getSajt } from "@/lib/sajt";
@@ -34,8 +33,8 @@ async function Porudzbina() {
     return (
       <div className="mt-8 rounded-[6px] bg-surface p-8 text-center">
         <p className="text-[16px]">{PORUKA_MREZA}</p>
-        <a href={contact.phoneHref} className="btn-primary mt-6" style={{ height: 48, padding: "0 26px" }}>
-          Pozovite {contact.phone}
+        <a href={sajt.phoneHref} className="btn-primary mt-6" style={{ height: 48, padding: "0 26px" }}>
+          Pozovite {sajt.phone}
         </a>
       </div>
     );

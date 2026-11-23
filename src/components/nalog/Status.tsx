@@ -36,7 +36,7 @@ export function PosiljkaPilula({ status, label }: { status: StatusPosiljke; labe
 
 /** Oznaka kurirske službe, da se na prvi pogled vidi čija je pošiljka. */
 export function KurirZnacka({ courier, label }: { courier: string; label?: string }) {
-  const boja = courier === "postexpress" ? "bg-[#ffd200] text-primary" : courier === "bex" ? "bg-primary text-white" : "bg-page text-secondary";
+  const boja = courier === "dexpress" ? "bg-[#e30613] text-white" : courier === "postexpress" ? "bg-[#ffd200] text-primary" : courier === "bex" ? "bg-primary text-white" : "bg-page text-secondary";
   return <span className={`inline-flex shrink-0 items-center rounded-[3px] px-2 py-1 text-[11px] font-bold uppercase leading-none tracking-[0.06em] ${boja}`}>{label ?? KURIR_LABEL[courier] ?? courier}</span>;
 }
 

@@ -1,34 +1,20 @@
 import Link from "next/link";
-import { categories, categoryHref } from "@/data/site";
-import { ChevronRight } from "../Icons";
+import { categoryHref } from "@/data/site";
+import { getOdeljci } from "@/lib/grupe";
+import Putanja from "../Putanja";
 
 /*
-  Zaglavlje kataloga: putanja, nadnaslov, naslov i tekst, pa pilule svih grupa (izabrana tamna) za brz prelaz između grupa.
-  Na telefonu se pilule prevlače vodoravno.
+  Zaglavlje kataloga: putanja (siva traka, components/Putanja), nadnaslov, naslov i tekst, pa pilule svih grupa (izabrana tamna) za brz prelaz između grupa.
+  Na telefonu se pilule prevlače vodoravno. Grupe su iz admina (lib/grupe.ts).
 */
-export default function Zaglavlje({ naslov, tekst, putanja, aktivna }: { naslov: string; tekst: string; putanja: { label: string; href?: string }[]; aktivna?: string }) {
+export default async function Zaglavlje({ naslov, tekst, putanja, aktivna }: { naslov: string; tekst: string; putanja: { label: string; href?: string }[]; aktivna?: string }) {
+  const categories = await getOdeljci();
   return (
+    <>
+    <Putanja stavke={putanja} />
     <section className="border-b border-subtle bg-surface">
-      <div className="container-site pb-8 pt-5 md:pb-10">
-        <nav aria-label="Putanja">
-          <ol className="no-scrollbar flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-[13px] text-secondary">
-            <li>
-              <Link href="/" className="hover:text-primary">Početna</Link>
-            </li>
-            {putanja.map((p) => (
-              <li key={p.label} className="flex items-center gap-1.5">
-                <ChevronRight width={12} height={12} strokeWidth={1.8} aria-hidden />
-                {p.href ? (
-                  <Link href={p.href} className="hover:text-primary">{p.label}</Link>
-                ) : (
-                  <span aria-current="page" className="text-primary">{p.label}</span>
-                )}
-              </li>
-            ))}
-          </ol>
-        </nav>
-
-        <div className="mt-8 md:mt-10">
+      <div className="container-site pb-8 pt-8 md:pb-10 md:pt-10">
+        <div>
           <p className="kicker">Prodavnica</p>
           <h1 className="h-section mt-3">{naslov}</h1>
           <p className="p-muted mt-3 max-w-[640px] text-[15px] md:text-[16px] md:leading-[26px]">{tekst}</p>
@@ -53,5 +39,6 @@ export default function Zaglavlje({ naslov, tekst, putanja, aktivna }: { naslov:
         </ul>
       </div>
     </section>
+    </>
   );
 }

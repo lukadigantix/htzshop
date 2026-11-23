@@ -5,6 +5,7 @@ import { refresh } from "next/cache";
 import { API_URL } from "@/lib/api";
 import { getKorpa, getKupon, korpaOpcije, obracunajKorpu, PORUKA_MREZA } from "@/lib/korpa";
 import { getToken } from "@/lib/nalog";
+import { ispravanBroj, podeliAdresu } from "@/lib/adresar";
 import { jeUuid, KORPA, KORPA_MAX_KOM, KORPA_MAX_STAVKI, KUPON, serijalizujKorpu, varijanta, type NacinPlacanja, type Obracun, type Porudzbina, type Stavka, type TipIsporuke } from "@/lib/korpa-deo";
 
 /*
@@ -78,6 +79,14 @@ export async function dodajUKorpu(slug: string, trazeno = 1): Promise<StanjeDoda
   };
 }
 
+/** Zbir korpe za obaveštenje „Dodato u korpu" (traži se posle prikaza, da dodavanje ne čeka obračun) */
+export async function zbirKorpe(): Promise<{ broj: number; stavki: number; subtotal: number } | null> {
+  const korpa = await getKorpa();
+  if (!korpa.length) return { broj: 0, stavki: 0, subtotal: 0 };
+  const ob = await obracunajKorpu(korpa);
+  return ob ? { broj: korpa.reduce((n, s) => n + s.qty, 0), stavki: korpa.length, subtotal: ob.subtotal } : null;
+}
+
 /** Količina na strani korpe; 0 = ukloni. */
 export async function promeniKolicinu(productId: string, qty: number) {
   if (!jeUuid(productId)) return;
@@ -144,7 +153,7 @@ const NAZIV: Record<string, string> = {
   guestEmail: "e-mail",
   companyName: "naziv firme",
   pib: "PIB",
-  shippingAddress: "ulica i broj",
+  shippingAddress: "ulica i kućni broj",
   shippingZipCode: "poštanski broj",
   shippingCity: "mesto",
   uslovi: "saglasnost sa uslovima kupovine",
@@ -192,10 +201,13 @@ export async function naruci(_prev: StanjeNaplate, fd: FormData): Promise<Stanje
   }
   if (izbor.deliveryType === "adresa") {
     const shippingAddress = tekst(fd, "shippingAddress"), shippingZipCode = tekst(fd, "shippingZipCode"), shippingCity = tekst(fd, "shippingCity");
-    if (shippingAddress.length < 3) polja.push("shippingAddress");
+    // mesto iz šifarnika kurira (D Express); bez njega (adresar ne radi) mesto se traži po nazivu i poštanskom broju
+    const shippingTownId = /^\d{6,8}$/.test(tekst(fd, "shippingTownId")) ? Number(tekst(fd, "shippingTownId")) : null;
+    const { ulica, broj } = podeliAdresu(shippingAddress);
+    if (ulica.length < 2 || !ispravanBroj(broj)) polja.push("shippingAddress");
     if (!/^\d{5}$/.test(shippingZipCode)) polja.push("shippingZipCode");
     if (shippingCity.length < 2) polja.push("shippingCity");
-    Object.assign(body, { shippingAddress, shippingZipCode, shippingCity });
+    Object.assign(body, { shippingAddress, shippingZipCode, shippingCity, ...(shippingTownId ? { shippingTownId } : {}) });
     if (izbor.courier) body.courier = izbor.courier;
   }
   if (fd.get("uslovi") !== "1") polja.push("uslovi");
@@ -233,11 +245,12 @@ export async function naruci(_prev: StanjeNaplate, fd: FormData): Promise<Stanje
   c.delete(KORPA);
   c.delete(KUPON);
   // samo ono što potvrda crta (backend vraća i interna polja porudžbine)
-  const { id, orderNumber, paymentMethod, deliveryType, isPaid, subtotalAmount, discountAmount, shippingCost, totalAmount, courier, guestEmail: email, companyName, shippingAddress, shippingCity, shippingZipCode, items, ipsQr, payBy } = porudzbina;
+  const { id, orderNumber, paymentMethod, deliveryType, isPaid, subtotalAmount, discountAmount, shippingCost, totalAmount, courier, guestEmail: email, companyName, shippingAddress, shippingCity, shippingZipCode, items, ipsQr, payBy, proforma } = porudzbina;
   return {
     ok: true,
     porudzbina: {
       id, orderNumber, paymentMethod, deliveryType, isPaid, courier, companyName, shippingAddress, shippingCity, shippingZipCode, ipsQr, payBy,
+      proforma: proforma ?? null,
       guestName: porudzbina.guestName,
       guestEmail: email,
       subtotalAmount: Number(subtotalAmount),

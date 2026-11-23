@@ -33,8 +33,7 @@ export const metadata: Metadata = {
 
 /** strane za praćenje na sajtovima kurirskih službi (rezerva dok naša provera ne nađe broj) */
 const KURIRI: { id: string; naziv: string; url: string; broj: string }[] = [
-  { id: "postexpress", naziv: "Post Express", url: "https://www.posta.rs/cir/alati/pracenje-posiljke.aspx", broj: "Npr. PE123456785RS" },
-  { id: "bex", naziv: "BEX", url: "https://www.bex.rs/", broj: "Samo cifre, npr. 2611504" },
+  { id: "dexpress", naziv: "D Express", url: "https://www.dexpress.rs/rs/pracenje-posiljaka", broj: "Dva slova i 10 cifara, npr. TT0000000001" },
 ];
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -167,8 +166,9 @@ export default async function PracenjePosiljkePage({ searchParams }: Props) {
             </ol>
           </section>
 
-          <div className="space-y-3">
-            <section aria-labelledby="broj" className={KARTICA}>
+          {/* desna kolona prati visinu leve kartice: tekstualne kartice dele višak visine, telefon ostaje svoje visine */}
+          <div className="flex flex-col gap-3">
+            <section aria-labelledby="broj" className={`${KARTICA} lg:flex lg:flex-1 lg:flex-col lg:justify-center`}>
               <h2 id="broj" className="flex items-center gap-2.5 text-[17px] font-medium">
                 <Mail className="size-5 text-brand-active" strokeWidth={1.7} /> Gde je broj pošiljke?
               </h2>
@@ -180,7 +180,7 @@ export default async function PracenjePosiljkePage({ searchParams }: Props) {
                 .
               </p>
             </section>
-            <section aria-labelledby="sluzbe" className={KARTICA}>
+            <section aria-labelledby="sluzbe" className={`${KARTICA} lg:flex lg:flex-1 lg:flex-col lg:justify-center`}>
               <h2 id="sluzbe" className="flex items-center gap-2.5 text-[17px] font-medium">
                 <TruckIcon className="size-5 text-brand-active" strokeWidth={1.7} /> Kurirske službe
               </h2>

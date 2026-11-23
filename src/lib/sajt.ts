@@ -1,10 +1,13 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import { API_URL } from "./api";
 import { contact } from "@/data/site";
 
 /**
- * Admin → Podešavanja → Sajt: podnožje i kontakt podaci (`GET /footer`) i radno vreme (`GET /working-hours/display`).
- * Polje koje je u adminu prazno uzima vrednost iz data/site.ts, pa sajt nikad ne ostaje bez adrese ili telefona.
+ * Admin → Podešavanja → Sajt i Firma: podnožje, kontakt i podaci firme (`GET /footer`) i radno vreme
+ * (`GET /working-hours/display`). Polje koje je u adminu prazno (ili backend ne odgovara) uzima vrednost iz data/site.ts,
+ * pa sajt nikad ne ostaje bez adrese ili telefona. Prag besplatne dostave i brojke (artikli, brendovi) postoje samo iz
+ * backenda: bez njih sajt ih ne pominje.
  */
 export type RadnoVreme = { days: string; hours: string; isOpen: boolean; note: string | null };
 /** jedan dan u nedelji (1 = ponedeljak … 7 = nedelja), vreme kao „08:00"; za status „otvoreno/zatvoreno" */
@@ -26,9 +29,35 @@ export type Sajt = {
   hours: RadnoVreme[];
   week: Dan[];
   mapsHref: string;
+  /** poslovno ime iz APR-a (pravne strane, JSON-LD) */
+  legalName: string;
+  /** drugi telefon (brendiranje odeće) */
+  phone2: string;
+  phone2Href: string;
+  founded: number;
+  /** radnja na mapi */
+  map: { lat: number; lng: number };
+  /** tekući račun, samo kada je u adminu uključen prikaz */
+  bank: { name: string; account: string } | null;
+  /** besplatna dostava iznad ovog iznosa (RSD); null = nema besplatne dostave */
+  freeShippingFrom: number | null;
+  customersRetail: number | null;
+  customersWholesale: number | null;
+  /** modeli i brendovi koje prodavnica prikazuje; null kada backend ne odgovara */
+  productCount: number | null;
+  brandCount: number | null;
 };
 
-type ApiFooter = Partial<Record<"description" | "facebook" | "instagram" | "twitter" | "tiktok" | "name" | "street" | "city" | "phone" | "email" | "pib" | "mb", string>>;
+type ApiFooter = Partial<Record<"description" | "facebook" | "instagram" | "twitter" | "tiktok" | "name" | "street" | "city" | "phone" | "email" | "pib" | "mb" | "legalName" | "phone2", string>> & {
+  founded?: number | null;
+  map?: { lat: number; lng: number } | null;
+  bank?: { name: string; account: string } | null;
+  freeShippingFrom?: number | null;
+  customersRetail?: number | null;
+  customersWholesale?: number | null;
+  productCount?: number;
+  brandCount?: number;
+};
 type ApiSati = { days: string; hours: string; isOpen: number | boolean; note: string | null }[];
 type ApiDani = { dayOfWeek: number; isOpen: number | boolean; openTime: string | null; closeTime: string | null }[];
 
@@ -52,7 +81,8 @@ async function api<T>(path: string): Promise<T | null> {
 
 export async function getSajt(): Promise<Sajt> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const [f, sati, dani] = await Promise.all([api<ApiFooter>("/footer"), api<ApiSati>("/working-hours/display"), api<ApiDani>("/working-hours")]);
   const v = (x: string | undefined, rezerva: string) => x?.trim() || rezerva;
 
@@ -79,5 +109,21 @@ export async function getSajt(): Promise<Sajt> {
       : contact.hours.map((h) => ({ days: h.days, hours: h.time, isOpen: h.time !== "zatvoreno", note: null })),
     week: (dani ?? []).map((d) => ({ day: d.dayOfWeek, isOpen: Boolean(d.isOpen), open: d.openTime, close: d.closeTime })),
     mapsHref: `https://www.google.com/maps/search/?api=1&query=${adresa}`,
+    legalName: v(f?.legalName, contact.legalName),
+    phone2: v(f?.phone2, contact.phone2),
+    phone2Href: f?.phone2?.trim() ? telHref(f.phone2) : contact.phone2Href,
+    founded: f?.founded ?? contact.founded,
+    map: f?.map ?? contact.coords,
+    bank: f?.bank ?? null,
+    freeShippingFrom: f?.freeShippingFrom ?? null,
+    customersRetail: f?.customersRetail ?? null,
+    customersWholesale: f?.customersWholesale ?? null,
+    productCount: f?.productCount ?? null,
+    brandCount: f?.brandCount ?? null,
   };
 }
+
+/** 8000 → „8.000 RSD" */
+export const iznos = (n: number) => `${n.toLocaleString("sr-RS").replace(/,/g, ".")} RSD`;
+/** 1841 → „1.800+" (zaokruženo naniže na stotinu, za brojke tipa „više od") */
+export const okruglo = (n: number) => (n >= 100 ? `${(Math.floor(n / 100) * 100).toLocaleString("sr-RS").replace(/,/g, ".")}+` : String(n));

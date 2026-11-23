@@ -4,6 +4,7 @@ import type { Brend } from "@/lib/brendovi";
 const MERE = {
   mali: { w: 96, h: 54, logo: "max-h-9 max-w-[96px]", tekst: ["text-[17px]", "text-[13px]"], crta: "mt-1.5 w-6" },
   srednji: { w: 160, h: 72, logo: "max-h-14 max-w-[160px]", tekst: ["text-[28px]", "text-[22px]"], crta: "mt-2.5 w-10" },
+  kompaktni: { w: 130, h: 56, logo: "max-h-11 max-w-[130px]", tekst: ["text-[22px]", "text-[17px]"], crta: "mt-2 w-8" },
   veliki: { w: 220, h: 110, logo: "max-h-24 max-w-[220px]", tekst: ["text-[40px]", "text-[30px]"], crta: "mt-2.5 w-10" },
 };
 

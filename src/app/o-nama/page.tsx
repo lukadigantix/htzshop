@@ -7,9 +7,10 @@ import { STIT } from "@/components/logoPutanje";
 import Razdvajac from "@/components/Razdvajac";
 import { ArrowRight, Mail, Phone, Pin } from "@/components/Icons";
 import ZnakBrenda from "@/components/brendovi/ZnakBrenda";
-import { categories, categoryHref, contact, printMethods } from "@/data/site";
+import { categoryHref, printMethods } from "@/data/site";
+import { getOdeljci } from "@/lib/grupe";
 import { getBrendovi } from "@/lib/brendovi";
-import { getSajt } from "@/lib/sajt";
+import { getSajt, iznos, okruglo, type Sajt } from "@/lib/sajt";
 import { jsonLd, podaciFirme, SITE_URL } from "@/lib/seo";
 
 /*
@@ -36,12 +37,23 @@ export const metadata: Metadata = {
   openGraph: { title: "O nama - HTZ Shop", description: OPIS, images: ["/images/photo/prodavnica.jpg"] },
 };
 
-const BROJKE = [
-  { vrednost: "2017.", opis: "godina osnivanja" },
-  { vrednost: "1.000+", opis: "artikala u ponudi" },
-  { vrednost: "670", opis: "kupaca na veliko" },
-  { vrednost: "8.000", opis: "kupaca na malo" },
+// Brojke iz admina: godina i broj kupaca (Podešavanja → Firma), artikli koje prodavnica prikazuje (uživo)
+const broj = (n: number) => n.toLocaleString("sr-RS").replace(/,/g, ".");
+const brojke = (s: Sajt) => [
+  { vrednost: `${s.founded}.`, opis: "godina osnivanja" },
+  ...(s.productCount ? [{ vrednost: okruglo(s.productCount), opis: "artikala u ponudi" }] : []),
+  ...(s.customersWholesale ? [{ vrednost: broj(s.customersWholesale), opis: "kupaca na veliko" }] : []),
+  ...(s.customersRetail ? [{ vrednost: broj(s.customersRetail), opis: "kupaca na malo" }] : []),
 ];
+// „Danas imamo više od 1.800 artikala u ponudi, 670 kupaca na veliko i 8.000 kupaca na malo."
+const danas = (s: Sajt) => {
+  const delovi = [
+    s.productCount ? `više od ${okruglo(s.productCount).replace("+", "")} artikala u ponudi` : "",
+    s.customersWholesale ? `${broj(s.customersWholesale)} kupaca na veliko` : "",
+    s.customersRetail ? `${broj(s.customersRetail)} kupaca na malo` : "",
+  ].filter(Boolean);
+  return delovi.length ? ` Danas imamo ${delovi.length > 1 ? `${delovi.slice(0, -1).join(", ")} i ${delovi.at(-1)}` : delovi[0]}.` : "";
+};
 
 const NACELA = [
   { naslov: "Oprema po propisima", opis: "Radimo u skladu sa važećim zakonima i propisima, a nudimo opremu koja prati potrebe posla i standarde zaštite na radu." },
@@ -50,7 +62,7 @@ const NACELA = [
 ];
 
 export default async function ONamaPage() {
-  const [s, brands] = await Promise.all([getSajt(), getBrendovi().then((b) => b ?? [])]);
+  const [s, brands, categories] = await Promise.all([getSajt(), getBrendovi().then((b) => b ?? []), getOdeljci()]);
   // „sito, flex i DTF"
   const imena = printMethods.map((m) => m.name.replace(/ štampa$/, "").replace(/^(Sito|Flex)$/, (x) => x.toLowerCase()));
   const tehnike = `${imena.slice(0, -1).join(", ")} i ${imena.at(-1)}`;
@@ -80,7 +92,7 @@ export default async function ONamaPage() {
     {
       broj: "04",
       naslov: "Isporuka širom Srbije",
-      opis: `Poručite na sajtu ili telefonom. Isporuka je besplatna za porudžbine iznad ${contact.freeShippingFrom}.`,
+      opis: `Poručite na sajtu ili telefonom. ${s.freeShippingFrom ? `Isporuka je besplatna za porudžbine iznad ${iznos(s.freeShippingFrom)}.` : "Cena dostave se vidi u korpi pre poručivanja."}`,
       link: "Prodavnica",
       href: "/prodavnica/",
     },
@@ -97,7 +109,7 @@ export default async function ONamaPage() {
     },
     {
       q: "Od kada radi HTZ Shop?",
-      a: `Od ${contact.founded}. godine. Danas imamo više od 1.000 artikala u ponudi, 670 kupaca na veliko i 8.000 kupaca na malo.`,
+      a: `Od ${s.founded}. godine.${danas(s)}`,
     },
     {
       q: "Šta sve prodajete?",
@@ -105,7 +117,7 @@ export default async function ONamaPage() {
     },
     {
       q: "Da li prodajete firmama na veliko?",
-      a: "Da. Imamo 670 kupaca na veliko. Firmama pripremamo ponudu po spisku i veličinama, sa brendiranjem i rokom isporuke. Ponudu možete zatražiti preko strane Kontakt ili telefonom.",
+      a: `Da.${s.customersWholesale ? ` Imamo ${broj(s.customersWholesale)} kupaca na veliko.` : ""} Firmama pripremamo ponudu po spisku i veličinama, sa brendiranjem i rokom isporuke. Ponudu možete zatražiti preko strane Kontakt ili telefonom.`,
     },
     {
       q: "Koje brendove imate?",
@@ -167,7 +179,7 @@ export default async function ONamaPage() {
 
           <div className="hero-in mt-10 max-w-[980px] md:mt-14">
             <p className="text-[12px] uppercase tracking-[0.18em] text-white/55">O nama</p>
-            <h1 className="mt-6 text-[44px] font-medium leading-[1.02] tracking-[-0.03em] md:text-[68px] xl:text-[88px]">
+            <h1 className="mt-6 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">
               Sve za bezbedan rad, <span className="text-brand">na jednom mestu.</span>
             </h1>
             <p className="mt-7 max-w-[640px] text-[16px] leading-[27px] text-white/70 md:text-[18px] md:leading-[30px]">{OPIS}</p>
@@ -183,7 +195,7 @@ export default async function ONamaPage() {
 
           {/* brojke */}
           <dl className="mt-16 grid grid-cols-2 gap-px overflow-hidden rounded-[6px] bg-white/10 md:mt-24 lg:grid-cols-4">
-            {BROJKE.map((b, i) => (
+            {brojke(s).map((b, i) => (
               <div key={b.opis} className="bg-primary/90 p-5 backdrop-blur md:p-8">
                 <dt className="sr-only">{b.opis}</dt>
                 <dd className={`text-[40px] font-medium leading-none tracking-[-0.04em] tabular-nums md:text-[64px] ${i === 0 ? "text-brand" : ""}`}>{b.vrednost}</dd>
@@ -207,7 +219,7 @@ export default async function ONamaPage() {
             </h2>
             <div className="mt-8 grid gap-6 text-[16px] leading-[27px] text-secondary md:grid-cols-2 md:gap-8">
               <p>
-                HTZ Shop radi od {contact.founded}. godine u Svilajncu. Nudimo širok asortiman higijenske i tehničke zaštitne opreme: radnu odeću, zaštitnu obuću, rukavice i
+                HTZ Shop radi od {s.founded}. godine u Svilajncu. Nudimo širok asortiman higijenske i tehničke zaštitne opreme: radnu odeću, zaštitnu obuću, rukavice i
                 opremu za zaštitu glave, očiju, sluha, disajnih organa i od pada.
               </p>
               <p>
@@ -234,7 +246,7 @@ export default async function ONamaPage() {
             </div>
             <div className="absolute left-5 top-5 rounded-[4px] bg-brand px-4 py-3 text-on-brand shadow-[0_14px_30px_-14px_rgba(32,33,36,0.6)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em]">Od</p>
-              <p className="text-[34px] font-semibold leading-none tracking-[-0.03em]">{contact.founded}.</p>
+              <p className="text-[34px] font-semibold leading-none tracking-[-0.03em]">{s.founded}.</p>
             </div>
           </div>
         </div>
@@ -281,7 +293,7 @@ export default async function ONamaPage() {
             <p className="eyebrow">Asortiman</p>
             <h2 className="h-section mt-3">Oprema za svaki posao.</h2>
             <p className="p-muted mt-5 max-w-[420px] text-[15px]">
-              Više od 1.000 artikala proverenih evropskih brendova. Ako artikal trenutno nije dostupan ili se cena promenila, javljamo vam se posle porudžbine.
+              {s.productCount ? `Više od ${okruglo(s.productCount).replace("+", "")} artikala proverenih evropskih brendova.` : "Artikli proverenih evropskih brendova."} Ako artikal trenutno nije dostupan ili se cena promenila, javljamo vam se posle porudžbine.
             </p>
             <Link href="/prodavnica/" className="btn-primary mt-8" style={{ height: 48, padding: "0 26px" }}>
               Sva oprema <ArrowRight width={15} height={15} strokeWidth={1.8} />
@@ -355,7 +367,7 @@ export default async function ONamaPage() {
           {/* mapa radnje (ista kao na strani Kontakt), bez kartice preko nje */}
           <div className="relative h-[360px] md:h-[440px] lg:h-auto lg:min-h-[640px]">
             <div className="absolute inset-0">
-              <Mapa name={s.name} levo={0} />
+              <Mapa name={s.name} tacka={s.map} levo={0} />
             </div>
           </div>
           <div className="p-6 md:p-10 xl:p-14">
@@ -394,7 +406,7 @@ export default async function ONamaPage() {
             </div>
             <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-subtle pt-6 text-[13px] sm:grid-cols-3">
               {[
-                ["Poslovno ime", contact.legalName],
+                ["Poslovno ime", s.legalName],
                 ["PIB", s.pib],
                 ["Matični broj", s.mb],
               ]
@@ -426,7 +438,7 @@ export default async function ONamaPage() {
           </div>
           <div className="border-t border-subtle">
             {pitanja.map((p) => (
-              <details key={p.q} className="group border-b border-subtle">
+              <details key={p.q} name="cesta-pitanja" className="group border-b border-subtle">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-medium leading-snug md:py-6 md:text-[18px] [&::-webkit-details-marker]:hidden">
                   {p.q}
                   <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-subtle transition group-open:border-brand group-open:bg-brand">

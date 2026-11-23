@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cacheLife } from "next/cache";
-import { categoryHref, contact } from "@/data/site";
-import { getSajt } from "@/lib/sajt";
+import { categoryHref } from "@/data/site";
+import { getSajt, iznos } from "@/lib/sajt";
+import { getOdeljci } from "@/lib/grupe";
 import { jsonLd, podaciFirme } from "@/lib/seo";
 import { RadnoVremeTabela } from "./kontakt/Radnja";
 import { STIT } from "./logoPutanje";
@@ -50,7 +51,6 @@ const pravno = [
   { name: "Povraćaj novca i robe", href: "/povracaj-novca/" },
 ];
 
-const traka = ["Radna odeća", "Zaštitna obuća", "Rukavice", "Zaštita glave", "Zaštita sluha", "Rad na visini", "Brendiranje odeće", `Besplatna isporuka iznad ${contact.freeShippingFrom}`, `Svilajnac, od ${contact.founded}.`];
 const SRAFURA = "repeating-linear-gradient(-45deg, var(--brand-primary) 0 9px, var(--brand-on-primary) 9px 18px)";
 
 // godina za ©: Cache Components ne dozvoljava `new Date()` u prerenderu, pa ide kroz keširanu funkciju (osvežava se dnevno)
@@ -91,7 +91,14 @@ function Linkovi({ broj, naslov, linkovi }: { broj: string; naslov: string; link
 const podvuci = "decoration-brand decoration-2 underline-offset-[6px] hover:underline";
 
 export default async function Footer() {
-  const [s, godina] = await Promise.all([getSajt(), tekucaGodina()]);
+  const [s, godina, odeljci] = await Promise.all([getSajt(), tekucaGodina(), getOdeljci()]);
+  // Traka: glavne grupe iz admina, brendiranje, besplatna isporuka (samo kada postoji prag) i mesto radnje
+  const traka = [
+    ...odeljci.slice(0, 6).map((g) => g.short),
+    "Brendiranje odeće",
+    ...(s.freeShippingFrom ? [`Besplatna isporuka iznad ${iznos(s.freeShippingFrom)}`] : []),
+    `${s.city.replace(/^\d+\s*/, "")}, od ${s.founded}.`,
+  ];
   const mreze = [
     { href: s.facebook, label: "Facebook" },
     { href: s.instagram, label: "Instagram" },
@@ -148,7 +155,7 @@ export default async function Footer() {
             <Image src="/images/logo/htz-logo-white.svg" alt="HTZ Shop" width={1784} height={354} className="h-11 w-auto transition-opacity group-hover:opacity-85 md:h-14" />
             <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/45">Zaštitna i radna oprema
               <Razdvajac />
-              od {contact.founded}.</span>
+              od {s.founded}.</span>
           </Link>
         </div>
 
@@ -164,14 +171,14 @@ export default async function Footer() {
             <a href={s.mapsHref} target="_blank" rel="noreferrer" className={`mt-4 inline-block text-[15px] font-medium ${podvuci}`}>
               Otvori na mapi <span className="text-brand">↗</span>
             </a>
-            {/* svi podaci firme na jednom mestu: kontakt iz admina (Podešavanja → Sajt), tekući račun iz data/site.ts */}
+            {/* svi podaci firme na jednom mestu, iz admina (Podešavanja → Sajt i Firma); račun samo kada je prikaz uključen */}
             <dl className="mt-6 space-y-2.5 border-t border-white/12 pt-5 text-[15px]">
               {[
                 { k: "Telefon", v: s.phone, href: s.phoneHref },
                 { k: "E-mail", v: s.email, href: `mailto:${s.email}` },
                 { k: "PIB", v: s.pib },
                 { k: "Matični br.", v: s.mb },
-                { k: "Račun", v: contact.bank },
+                { k: "Račun", v: s.bank ? `${s.bank.name} ${s.bank.account}` : "" },
               ]
                 .filter((r) => r.v)
                 .map((r) => (

@@ -1,13 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { contact, printMethods } from "@/data/site";
+import { printMethods } from "@/data/site";
+import { getSajt } from "@/lib/sajt";
 
 /*
   Brendiranje odeće: fotografija radionice levo, desno bela kartica sa naslovom, tri tehnike štampe
   (sito, flex, DTF sa originalnog sajta) i pozivom na ponudu. Na fotografiji plutajuća oznaka sa
   aktuelnom ponudom (radni prsluk sa štampom, 450 RSD, sa originalnog sajta).
 */
-export default function Branding() {
+export default async function Branding() {
+  const s = await getSajt();
   return (
     <section id="brendiranje" className="container-site pb-16 md:pb-24">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.15fr] lg:gap-8">
@@ -49,8 +51,8 @@ export default function Branding() {
             </div>
             <p className="mt-5 text-[13px] text-secondary">
               Za cene brendiranja pozovite{" "}
-              <a href={contact.phone2Href} className="font-medium text-primary">{contact.phone2}</a> ili pišite na{" "}
-              <a href={`mailto:${contact.email}`} className="font-medium text-primary">{contact.email}</a>.
+              <a href={s.phone2Href} className="font-medium text-primary">{s.phone2}</a> ili pišite na{" "}
+              <a href={`mailto:${s.email}`} className="font-medium text-primary">{s.email}</a>.
             </p>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { Banknote, Building2, CircleAlert, Clock3, Landmark, PackageCheck, QrCod
 import { RadnoVremeTabela } from "@/components/kontakt/Radnja";
 import { faqLd, Odeljak, OkvirUslova, Pitanja, Pravila, Pravilo, UkratkoUslova, UvodUslova } from "@/components/info/Uslovi";
 import { ArrowRight, Phone, Store, Truck } from "@/components/Icons";
-import { contact } from "@/data/site";
 import { getUsloviKupovine } from "@/lib/kupovina";
 import { REKLAMACIJA_ROK_DANA } from "@/lib/nalog-deo";
 import { getSajt } from "@/lib/sajt";
@@ -44,7 +43,8 @@ export default async function PlacanjeIsporukaPage() {
   const [s, uslovi] = await Promise.all([getSajt(), getUsloviKupovine()]);
   const kuriri = uslovi.kuriri.length ? uslovi.kuriri.join(" i ") : null;
   const rok = uslovi.rokNaStanju;
-  const [banka, racun] = [contact.bank.replace(/\s+\S+$/, ""), contact.bank.split(" ").at(-1) ?? ""];
+  // račun samo kada je prikaz uključen u adminu (Podešavanja → Firma)
+  const [banka, racun] = [s.bank?.name ?? "", s.bank?.account ?? ""];
 
   const UKRATKO = [
     { Icon: Wallet, vrednost: "3 načina", opis: "pouzeće, IPS QR, uplata na račun" },
@@ -278,7 +278,7 @@ export default async function PlacanjeIsporukaPage() {
         <Odeljak id="prodavac" broj="05" oznaka="Podaci o prodavcu" naslov="Prodavac i podaci za uplatu.">
           <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-[6px] bg-subtle ring-1 ring-subtle sm:grid-cols-2">
             {[
-              ["Poslovno ime", contact.legalName],
+              ["Poslovno ime", s.legalName],
               ["Adresa", `${s.street}, ${s.city}`],
               ["PIB", s.pib],
               ["Matični broj", s.mb],

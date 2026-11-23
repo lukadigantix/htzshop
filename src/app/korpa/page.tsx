@@ -7,7 +7,8 @@ import Kupon from "@/components/korpa/Kupon";
 import Stavke from "@/components/korpa/Stavke";
 import { ArrowRight, Phone } from "@/components/Icons";
 import { STIT } from "@/components/logoPutanje";
-import { categoryHref, contact } from "@/data/site";
+import { categoryHref } from "@/data/site";
+import { getSajt, type Sajt } from "@/lib/sajt";
 import { rsd } from "@/lib/filteri";
 import { getKorpa, getKupon, obracunajKorpu, PORUKA_MREZA } from "@/lib/korpa";
 
@@ -34,15 +35,15 @@ export default function KorpaPage() {
 }
 
 async function Korpa() {
-  const [stavke, kupon] = await Promise.all([getKorpa(), getKupon()]);
+  const [stavke, kupon, sajt] = await Promise.all([getKorpa(), getKupon(), getSajt()]);
   const ob = await obracunajKorpu(stavke, { deliveryType: "preuzimanje", couponCode: kupon || undefined });
 
   if (!ob) {
     return (
       <div className="mt-8 rounded-[6px] bg-surface p-8 text-center">
         <p className="text-[16px]">{PORUKA_MREZA}</p>
-        <a href={contact.phoneHref} className="btn-primary mt-6" style={{ height: 48, padding: "0 26px" }}>
-          Pozovite {contact.phone}
+        <a href={sajt.phoneHref} className="btn-primary mt-6" style={{ height: 48, padding: "0 26px" }}>
+          Pozovite {sajt.phone}
         </a>
       </div>
     );
@@ -50,7 +51,7 @@ async function Korpa() {
 
   const broj = ob.items.reduce((n, s) => n + s.quantity, 0);
   const nestali = stavke.length - ob.items.length;
-  if (ob.items.length === 0) return <Prazna nestali={nestali > 0} />;
+  if (ob.items.length === 0) return <Prazna nestali={nestali > 0} sajt={sajt} />;
 
   // problemi sa stavkama (stanje); poruke koje backend vezuje za stavku već stoje uz nju (note)
   const problemi = ob.problems.filter((p) => !ob.items.some((s) => s.note && p.includes(s.product.name)));
@@ -92,7 +93,7 @@ async function Korpa() {
           <ul className="grid grid-cols-1 gap-px overflow-hidden rounded-[6px] bg-subtle sm:grid-cols-3">
             {[
               { Icon: Truck, naslov: "Isporuka širom Srbije", opis: "Kurirskom službom na vašu adresu" },
-              { Icon: Store, naslov: "Lično preuzimanje", opis: `${contact.address}, Svilajnac` },
+              { Icon: Store, naslov: "Lično preuzimanje", opis: `${sajt.street}, ${sajt.city.replace(/^\d+\s*/, "")}` },
               { Icon: ShieldCheck, naslov: "Plaćanje pouzećem", opis: "Ili IPS QR kodom i uplatom na račun" },
             ].map(({ Icon, naslov, opis }) => (
               <li key={naslov} className="flex items-center gap-3.5 bg-surface p-4 md:p-5">
@@ -158,13 +159,13 @@ async function Korpa() {
               <p className="mt-6 rounded-[4px] bg-page px-4 py-3 text-[14px] text-secondary">Uskladite stavke označene levo, pa nastavite na plaćanje.</p>
             )}
 
-            <a href={contact.phoneHref} className="mt-5 flex items-center gap-3 rounded-[6px] bg-page p-3.5 transition hover:bg-brand-soft">
+            <a href={sajt.phoneHref} className="mt-5 flex items-center gap-3 rounded-[6px] bg-page p-3.5 transition hover:bg-brand-soft">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface">
                 <Phone width={17} height={17} strokeWidth={1.6} />
               </span>
               <span>
                 <span className="block text-[12px] text-secondary">Pomoć pri porudžbini</span>
-                <span className="block text-[16px] font-semibold">{contact.phone}</span>
+                <span className="block text-[16px] font-semibold">{sajt.phone}</span>
               </span>
             </a>
             <Link href="/kako-naruciti/" className="mt-3 block text-center text-[13px] text-secondary underline underline-offset-2 hover:text-primary">
@@ -202,7 +203,7 @@ const GRUPE = [
   { name: "Zaštita glave", slug: "zastita-glave" },
 ];
 
-function Prazna({ nestali }: { nestali: boolean }) {
+function Prazna({ nestali, sajt }: { nestali: boolean; sajt: Sajt }) {
   return (
     <section className="mt-8 overflow-hidden rounded-[6px] bg-surface">
       <div className="flex flex-col items-center px-6 py-14 text-center md:py-20">
@@ -220,8 +221,8 @@ function Prazna({ nestali }: { nestali: boolean }) {
           <Link href="/prodavnica/" className="btn-primary" style={{ height: 50, padding: "0 28px", fontSize: 15 }}>
             Idite u prodavnicu <ArrowRight width={15} height={15} strokeWidth={1.8} />
           </Link>
-          <a href={contact.phoneHref} className="btn-secondary" style={{ height: 50, padding: "0 28px", fontSize: 15 }}>
-            Pozovite {contact.phone}
+          <a href={sajt.phoneHref} className="btn-secondary" style={{ height: 50, padding: "0 28px", fontSize: 15 }}>
+            Pozovite {sajt.phone}
           </a>
         </div>
       </div>

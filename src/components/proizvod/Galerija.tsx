@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "../Icons";
+import { bezOptimizacije } from "@/lib/slike";
 
 /*
   Galerija proizvoda: velika slika na beloj površini, sličice ispod (desktop) i prevlačenje sa tačkama (mobilni).
@@ -19,9 +20,11 @@ export default function Galerija({ images, alt, badges }: { images: string[]; al
     traka.current?.scrollTo({ left: n * traka.current.clientWidth, behavior: "smooth" });
   };
 
+  // Na desktopu galerija prati visinu panela za kupovinu (slika se završava sa poslednjim boksom desno);
+  // na mobilnom je slika kvadratna
   return (
-    <div>
-      <div className="group relative overflow-hidden rounded-[4px] bg-surface">
+    <div className="lg:flex lg:flex-col">
+      <div className="group relative overflow-hidden rounded-[4px] bg-surface lg:min-h-[440px] lg:flex-1">
         {/* traka slika: na mobilnom se prevlači (scroll-snap), na desktopu je menjaju strelice i sličice */}
         <div
           ref={traka}
@@ -30,17 +33,17 @@ export default function Galerija({ images, alt, badges }: { images: string[]; al
             const i = Math.round(el.scrollLeft / el.clientWidth);
             if (i !== active) setActive(i);
           }}
-          className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto"
+          className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto lg:absolute lg:inset-0"
         >
           {images.map((src, i) => (
-            <div key={src + i} className="relative aspect-square w-full shrink-0 snap-center lg:aspect-[5/4]">
+            <div key={src + i} className="relative aspect-square w-full shrink-0 snap-center lg:aspect-auto lg:h-full">
               <Image
                 src={src}
                 alt={i === 0 ? alt : `${alt}, slika ${i + 1}`}
                 fill
                 priority={i === 0}
-                sizes="(min-width: 1024px) 60vw, 100vw"
-                unoptimized={/^https?:/.test(src)}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                unoptimized={bezOptimizacije(src)}
                 className="object-contain p-8 mix-blend-multiply md:p-14"
               />
             </div>
@@ -83,7 +86,7 @@ export default function Galerija({ images, alt, badges }: { images: string[]; al
               aria-current={i === active}
               className={`relative aspect-square overflow-hidden rounded-[4px] bg-surface ring-1 transition ${i === active ? "ring-primary" : "ring-transparent hover:ring-subtle"}`}
             >
-              <Image src={src} alt="" fill sizes="120px" unoptimized={/^https?:/.test(src)} className="object-contain p-2 mix-blend-multiply" />
+              <Image src={src} alt="" fill sizes="120px" unoptimized={bezOptimizacije(src)} className="object-contain p-2 mix-blend-multiply" />
             </button>
           ))}
         </div>

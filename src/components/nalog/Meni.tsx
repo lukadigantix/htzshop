@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutGrid, MapPin, MessageSquareWarning, Package, Truck, UserRound, type LucideIcon } from "lucide-react";
@@ -22,9 +22,21 @@ function aktivan(putanja: string) {
   return ODELJCI.find((o) => o.href !== "/moj-nalog/" && p.startsWith(o.href))?.href ?? null;
 }
 
+/** usePathname je podatak iz zahteva i Next (16.4.6+) traži da bude ispod <Suspense>; statički deo strane meni crta bez otvorenog odeljka. */
+function SaPutanjom({ children }: { children: (putanja: string) => ReactNode }) {
+  return children(usePathname());
+}
+
 /** Bočni meni na tamnoj koloni: otvoren odeljak je svetla traka sa žutom ikonom i žutom crtom levo. */
 export function BocniMeni() {
-  const putanja = usePathname();
+  return (
+    <Suspense fallback={<BocniMeniZa putanja="" />}>
+      <SaPutanjom>{(putanja) => <BocniMeniZa putanja={putanja} />}</SaPutanjom>
+    </Suspense>
+  );
+}
+
+function BocniMeniZa({ putanja }: { putanja: string }) {
   const on = aktivan(putanja);
   return (
     <ul className="space-y-0.5">
@@ -50,7 +62,14 @@ export function BocniMeni() {
 
 /** Odeljci na telefonu i tabletu: red pilula koji se prevlači prstom; otvoren odeljak se sam dovuče na vidik. */
 export function TrakaMenija() {
-  const putanja = usePathname();
+  return (
+    <Suspense fallback={<TrakaMenijaZa putanja="" />}>
+      <SaPutanjom>{(putanja) => <TrakaMenijaZa putanja={putanja} />}</SaPutanjom>
+    </Suspense>
+  );
+}
+
+function TrakaMenijaZa({ putanja }: { putanja: string }) {
   const on = aktivan(putanja);
   const ref = useRef<HTMLUListElement>(null);
   useEffect(() => {

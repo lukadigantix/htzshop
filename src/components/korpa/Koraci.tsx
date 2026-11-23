@@ -7,9 +7,9 @@ const KORACI = [
   { naziv: "Potvrda", href: null },
 ];
 
-export default function Koraci({ aktivan }: { aktivan: 0 | 1 | 2 }) {
+export default function Koraci({ aktivan, className = "" }: { aktivan: 0 | 1 | 2; className?: string }) {
   return (
-    <ol aria-label="Koraci kupovine" className="flex items-center gap-2 text-[13px] sm:gap-3 sm:text-[14px]">
+    <ol aria-label="Koraci kupovine" className={`flex items-center gap-2 text-[13px] sm:gap-3 sm:text-[14px] ${className}`}>
       {KORACI.map((k, i) => {
         const prodjen = i < aktivan;
         const sadrzaj = (

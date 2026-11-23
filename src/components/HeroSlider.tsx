@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { HeroSlide } from "@/data/site";
-import { ChevronLeft, ChevronRight } from "./Icons";
+import { ArrowRight, ChevronLeft, ChevronRight } from "./Icons";
+import { rsd } from "@/lib/filteri";
+import { fontSlajda } from "@/lib/fontovi-slajda";
+import { bezOptimizacije } from "@/lib/slike";
 
 const DURATION = 7000;
 
@@ -36,19 +39,47 @@ export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   }, [active, go]);
 
   return (
-    <section className="relative h-[620px] overflow-hidden bg-[#15181d] text-white md:h-[680px] xl:h-[702px]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel" aria-label="Istaknute kategorije">
+    <section className="relative h-[660px] overflow-hidden bg-[#15181d] text-white md:h-[740px] xl:h-[800px]" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carousel" aria-label="Istaknute kategorije">
       {slides.map((s, i) => {
         const isActive = i === active;
         return (
           <div key={s.key} className={`absolute inset-0 transition-opacity duration-700 ${isActive ? "opacity-100" : "pointer-events-none opacity-0"}`} aria-hidden={!isActive}>
             <Image src={s.image} alt={s.imageAlt} fill priority={i === 0} sizes="100vw" className="object-cover" style={{ objectPosition: s.imagePosition ?? "center" }} />
             <div className="absolute inset-0" style={{ backgroundImage: s.fade }} />
+            {/* istaknuti proizvod: kartica gore desno (na telefonu manja, ili skrivena ako je tako izabrano u adminu) */}
+            {s.product && (
+              <Link
+                href={s.product.href}
+                className={`group/p absolute right-4 top-4 z-10 w-[150px] overflow-hidden rounded-[14px] bg-white text-[#202124] shadow-[0_18px_40px_-18px_rgba(0,0,0,0.55)] transition hover:-translate-y-0.5 md:right-14 md:top-14 md:w-[240px] ${s.product.hideOnMobile ? "hidden md:block" : ""}`}
+              >
+                <span className="relative block aspect-[4/3] bg-white">
+                  {s.product.image && <Image src={s.product.image} alt="" fill sizes="240px" unoptimized={bezOptimizacije(s.product.image)} className="object-contain p-3 transition-transform duration-300 group-hover/p:scale-105" />}
+                </span>
+                <span className="block border-t border-black/5 px-3 pb-3 pt-2 md:px-4 md:pb-4 md:pt-3">
+                  <span className="line-clamp-2 text-[12px] font-semibold leading-snug md:text-[14px]">{s.product.name}</span>
+                  <span className="mt-1.5 flex items-baseline gap-2">
+                    <span className="text-[15px] font-bold tabular-nums md:text-[18px]">{rsd(s.product.price)}</span>
+                    {s.product.oldPrice != null && <span className="text-[11px] text-[#62666d] line-through tabular-nums md:text-[12px]">{rsd(s.product.oldPrice)}</span>}
+                  </span>
+                  <span className="mt-2 hidden items-center gap-1 text-[13px] font-semibold md:flex">Pogledaj <ArrowRight width={14} height={14} strokeWidth={2} /></span>
+                </span>
+              </Link>
+            )}
             <div key={isActive ? `t-${cycle}` : "t"} className={`absolute bottom-[96px] left-4 right-4 md:bottom-14 md:left-14 md:right-auto md:w-[480px] lg:w-[560px] xl:w-[640px] ${isActive ? "hero-in" : ""}`}>
-              <p className="text-[14px] text-white/90 md:text-[16px]">{s.eyebrow}</p>
-              <h1 className="mt-3 text-[34px] font-medium leading-[36px] md:text-[48px] md:leading-[52px]">{s.title}</h1>
-              <p className="mt-3 max-w-[540px] text-[14px] leading-[21px] text-white/85 md:mt-4 md:text-[16px] md:leading-[24px]">{s.text}</p>
+              {(s.logo || s.badge) && (
+                <div className="mb-4 flex items-center gap-3">
+                  {s.logo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={s.logo} alt="" className="h-7 w-auto max-w-[160px] object-contain md:h-8" />
+                  )}
+                  {s.badge && <span className="rounded-full border border-white/35 bg-white/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]">{s.badge}</span>}
+                </div>
+              )}
+              <p className="text-[14px] text-white/90 md:text-[16px]" style={fontSlajda(s.fonts?.eyebrow)}>{s.eyebrow}</p>
+              <h1 className="mt-3 text-[34px] font-medium leading-[36px] md:text-[48px] md:leading-[52px]" style={fontSlajda(s.fonts?.title)}>{s.title}</h1>
+              <p className="mt-3 max-w-[540px] text-[14px] leading-[21px] text-white/85 md:mt-4 md:text-[16px] md:leading-[24px]" style={fontSlajda(s.fonts?.text)}>{s.text}</p>
               <div className="mt-6 flex flex-wrap items-center gap-3 md:gap-4">
-                <Link href={s.cta.href} className="btn-primary">{s.cta.label}</Link>
+                <Link href={s.cta.href} className="btn-primary" style={s.ctaColors ? { backgroundColor: s.ctaColors.bg, color: s.ctaColors.text } : undefined}>{s.cta.label}</Link>
                 {s.secondary && (
                   <Link href={s.secondary.href} className="btn-secondary">
                     {s.secondary.label}

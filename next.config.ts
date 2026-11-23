@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: api.protocol === "https:" ? "https" : "http", hostname: api.hostname, port: api.port, pathname: "/uploads/**" },
     ],
+    // Slike sa backenda imaju jedinstven naziv (vreme otpremanja), pa se umanjena slika pamti 30 dana
+    minimumCacheTTL: 2_592_000,
     // Lokalno je backend na localhost-u, a Next ne optimizuje slike sa lokalnih adresa ako ovo nije uključeno
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
   },

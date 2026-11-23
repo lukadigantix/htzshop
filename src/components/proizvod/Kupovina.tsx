@@ -13,7 +13,7 @@ export default function Kupovina({ slug, inStock }: { slug: string; inStock: boo
 
   return (
     <div className="flex gap-3">
-      <div className="flex h-[52px] shrink-0 items-center rounded-full border border-input bg-surface">
+      <div className="flex h-[52px] shrink-0 items-center rounded-full border border-input bg-surface transition focus-within:border-primary focus-within:shadow-[0_0_0_4px_rgba(245,197,24,0.25)]">
         <button type="button" onClick={() => promeni(-1)} disabled={kolicina <= 1} aria-label="Smanji količinu" className="grid h-full w-11 place-items-center text-[20px] leading-none text-primary disabled:text-disabled">
           −
         </button>
@@ -37,8 +37,9 @@ export default function Kupovina({ slug, inStock }: { slug: string; inStock: boo
         disabled={!inStock || radi}
         aria-busy={radi}
         onClick={() => dodaj(slug, kolicina)}
-        style={{ height: 52, padding: "0 24px", fontSize: 15, ...(inStock ? {} : { background: "var(--disabled-background)", color: "var(--disabled-text)" }) }}
-        className="btn-primary flex-1"
+        style={{ height: 52, padding: "0 32px", fontSize: 15, ...(inStock ? {} : { background: "var(--disabled-background)", color: "var(--disabled-text)" }) }}
+        // na telefonu popunjava red, od sm širine je dugme svoje veličine (min. širina da „Dodato u korpu" ne pomera red)
+        className="btn-primary flex-1 sm:min-w-[230px] sm:flex-none"
       >
         {radi ? <LoaderCircle className="size-[18px] animate-spin" strokeWidth={2} aria-hidden /> : gotovo ? <Check className="size-[18px]" strokeWidth={2.4} aria-hidden /> : <Cart width={18} height={18} strokeWidth={1.8} />}
         {!inStock ? "Trenutno nema" : gotovo ? "Dodato u korpu" : "Dodaj u korpu"}

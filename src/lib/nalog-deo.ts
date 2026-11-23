@@ -64,6 +64,8 @@ export type PorudzbinaNaloga = {
   items: StavkaNaloga[];
   /** 14 dana od porudžbine i još bez reklamacije (backend) */
   canComplain: boolean;
+  /** uplata na račun: predračun (PDF na /api/predracun/<id>); u spisku porudžbina se ne šalje */
+  proforma: { number: string } | null;
 };
 
 export type Adresa = { id: string; fullName: string; phone: string; address: string; city: string; zipCode: string; country: string; isDefault: boolean };
@@ -130,7 +132,7 @@ export const placanjeOpis = (p: Pick<PorudzbinaNaloga, "paymentMethod" | "delive
   p.paymentMethod === "pouzece" && p.deliveryType === "preuzimanje" ? "Pri preuzimanju" : (PLACANJE_OPIS[p.paymentMethod] ?? p.paymentMethod);
 export const ISPORUKA_OPIS: Record<TipIsporuke, string> = { adresa: "Dostava na adresu", preuzimanje: "Lično preuzimanje u radnji" };
 export const STATUS_PLACANJA: Record<StatusPlacanja, string> = { unpaid: "Nije plaćeno", paid: "Plaćeno", refunded: "Novac vraćen" };
-export const KURIR_LABEL: Record<string, string> = { bex: "BEX", postexpress: "Post Express" };
+export const KURIR_LABEL: Record<string, string> = { dexpress: "D Express", bex: "BEX", postexpress: "Post Express" };
 
 export const REKLAMACIJA_LABEL: Record<StatusReklamacije, string> = { pending: "U obradi", accepted: "Prihvaćena", rejected: "Odbijena" };
 export const REKLAMACIJA_ROK_DANA = 14;
@@ -175,9 +177,10 @@ export function prijavljenIzKolacica(cookie: string) {
 /** broj pošiljke kako ga backend traži: bez razmaka, velika slova */
 export const normalizujBroj = (broj: string) => broj.replace(/\s+/g, "").toUpperCase();
 
-/** Služba po izgledu broja, isto pravilo kao na backendu: Post Express „PE123456785RS", BEX samo cifre. */
-export function prepoznajKurira(broj: string): "bex" | "postexpress" | null {
+/** Služba po izgledu broja, isto pravilo kao na backendu: D Express „TT0000000001", Post Express „PE123456785RS", BEX samo cifre. */
+export function prepoznajKurira(broj: string): "dexpress" | "bex" | "postexpress" | null {
   const n = normalizujBroj(broj);
+  if (/^[A-Z]{2}\d{10}$/.test(n)) return "dexpress";
   if (/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(n)) return "postexpress";
   if (/^\d{5,15}$/.test(n)) return "bex";
   return null;

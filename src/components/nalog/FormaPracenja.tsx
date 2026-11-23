@@ -44,7 +44,7 @@ export default function FormaPracenja({ broj, akcija = "/moj-nalog/pracenje/" }:
             Prepoznato: <b className="font-semibold text-primary">{KURIR_LABEL[kurir]}</b>
           </>
         ) : (
-          "Broj je u mejlu o slanju. BEX ima samo cifre, Post Express na primer PE123456785RS."
+          "Broj je u mejlu o slanju: dva slova i 10 cifara, na primer TT0000000001."
         )}
       </p>
     </Form>

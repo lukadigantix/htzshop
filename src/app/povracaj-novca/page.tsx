@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Ban, Banknote, Building2, CalendarClock, CircleCheck, Landmark, MailCheck, Package, PackageX, QrCode, RefreshCw, Store, Undo2, Wallet } from "lucide-react";
 import { faqLd, Odeljak, OkvirUslova, Pitanja, Pravila, Pravilo, UkratkoUslova, UvodUslova } from "@/components/info/Uslovi";
 import { ArrowRight, Phone, Truck } from "@/components/Icons";
-import { contact } from "@/data/site";
 import { REKLAMACIJA_ROK_DANA } from "@/lib/nalog-deo";
 import { getSajt } from "@/lib/sajt";
 import { jsonLd, SITE_URL } from "@/lib/seo";
@@ -298,7 +297,7 @@ export default async function PovracajNovcaPage() {
             </a>
           </div>
           <p className="mt-8 text-[13px] leading-[20px] text-secondary">
-            Prodavac: {contact.legalName}. Uslovi su deo{" "}
+            Prodavac: {s.legalName}. Uslovi su deo{" "}
             <Link href="/uslovi-koriscenja/#odustanak" className="font-medium text-primary underline underline-offset-2">
               Uslova korišćenja
             </Link>

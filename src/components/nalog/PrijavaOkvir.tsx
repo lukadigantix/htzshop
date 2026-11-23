@@ -54,7 +54,7 @@ export default async function PrijavaOkvir({ kicker, naslov, uvod, children, sce
         {/* scena: naslov (na telefonu samo on, iznad kartice) */}
         <div className="hero-in lg:self-stretch lg:py-6">
           <p className="text-[12px] uppercase tracking-[0.18em] text-white/55">Moj nalog</p>
-          <p className="mt-3 text-[34px] font-medium leading-[1.04] tracking-[-0.03em] md:text-[48px] lg:mt-6 xl:text-[64px]">
+          <p className="mt-3 text-[30px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[40px] lg:mt-6 xl:text-[52px]">
             {scena[0]} <span className="block text-brand">{scena[1]}</span>
           </p>
 

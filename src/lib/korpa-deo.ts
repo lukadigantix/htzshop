@@ -116,6 +116,8 @@ export type Porudzbina = {
   items: { id: string; productName: string; variantLabel: string | null; quantity: number; unitPrice: number; totalPrice: number }[];
   ipsQr: { dataUrl: string; account: string; amount: number; reference: string; purpose: string; recipient: string } | null;
   payBy: string | null;
+  // uplata na račun: predračun (PDF na /api/predracun/<id>)
+  proforma: { number: string; issueDate: string; dueDate: string | null } | null;
 };
 
 export const PLACANJE_NAZIV: Record<NacinPlacanja, string> = {

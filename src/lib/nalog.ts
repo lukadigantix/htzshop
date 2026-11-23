@@ -85,6 +85,7 @@ export function zaKupca(p: ApiPorudzbina): PorudzbinaNaloga {
     shippingCost: Number(p.shippingCost),
     totalAmount: Number(p.totalAmount),
     couponCode: p.couponCode ?? null,
+    proforma: p.proforma?.number ? { number: p.proforma.number } : null,
     shippingAddress: p.shippingAddress ?? null,
     shippingCity: p.shippingCity ?? null,
     shippingZipCode: p.shippingZipCode ?? null,

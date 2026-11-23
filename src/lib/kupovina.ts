@@ -1,4 +1,5 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import { API_URL } from "./api";
 import { KURIR_LABEL } from "./nalog-deo";
 
@@ -21,7 +22,8 @@ async function procitaj<T>(path: string): Promise<T | null> {
 
 export async function getUsloviKupovine(): Promise<UsloviKupovine> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const [kuriri, rokovi] = await Promise.all([procitaj<{ courier: string; label: string }[]>("/cart/couriers"), procitaj<{ inStockText: string | null }>("/delivery-times")]);
   return {
     kuriri: (kuriri ?? []).map((k) => KURIR_LABEL[k.courier] ?? k.label),

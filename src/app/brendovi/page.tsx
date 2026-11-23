@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Mreza from "@/components/brendovi/Mreza";
-import { STIT } from "@/components/logoPutanje";
 import Razdvajac from "@/components/Razdvajac";
 import { ArrowRight, Phone } from "@/components/Icons";
 import { getBrendovi } from "@/lib/brendovi";
@@ -66,9 +65,6 @@ export default async function BrendoviPage() {
         <Image src="/images/photo/slide-zastita.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[center_30%] opacity-[0.18] grayscale" />
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary via-primary/85 to-primary/40" />
         <div aria-hidden className="pointer-events-none absolute -left-40 -top-40 size-[560px] rounded-full bg-brand/15 blur-[120px]" />
-        <svg aria-hidden viewBox="0 0 296 354" className="pointer-events-none absolute -bottom-32 right-[-80px] hidden h-[560px] w-auto text-white/[0.04] lg:block xl:right-16">
-          <path fill="currentColor" fillRule="evenodd" d={STIT} />
-        </svg>
 
         <div className="container-site relative pb-12 pt-10 md:pb-16 md:pt-14 xl:pb-20">
           <nav aria-label="Putanja" className="text-[13px] text-white/50">
@@ -81,7 +77,7 @@ export default async function BrendoviPage() {
           <div className="mt-10 grid gap-10 md:mt-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="hero-in max-w-[860px]">
               <p className="text-[12px] uppercase tracking-[0.18em] text-white/55">Brendovi</p>
-              <h1 className="mt-5 text-[42px] font-medium leading-[1.03] tracking-[-0.03em] md:text-[64px] xl:text-[80px]">
+              <h1 className="mt-5 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">
                 Proverena oprema, <span className="text-brand">poznati proizvođači.</span>
               </h1>
               <p className="mt-6 max-w-[600px] text-[16px] leading-[27px] text-white/70 md:text-[17px] md:leading-[28px]">{OPIS}</p>

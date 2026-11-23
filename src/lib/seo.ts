@@ -1,4 +1,3 @@
-import { contact } from "@/data/site";
 import type { Sajt } from "./sajt";
 
 /**
@@ -24,7 +23,7 @@ export function podaciFirme(s: Sajt) {
     "@id": `${SITE_URL}/#firma`,
     name: "HTZ Shop",
     alternateName: s.name !== "HTZ Shop" ? s.name : undefined,
-    legalName: contact.legalName,
+    legalName: s.legalName,
     description: OPIS_FIRME,
     url: SITE_URL,
     logo: `${SITE_URL}/images/logo/htz-logo.svg`,
@@ -32,7 +31,7 @@ export function podaciFirme(s: Sajt) {
     telephone: tel,
     email: s.email,
     vatID: s.pib,
-    foundingDate: String(contact.founded),
+    foundingDate: String(s.founded),
     currenciesAccepted: "RSD",
     address: {
       "@type": "PostalAddress",
@@ -41,7 +40,7 @@ export function podaciFirme(s: Sajt) {
       addressLocality: mesto,
       addressCountry: "RS",
     },
-    geo: { "@type": "GeoCoordinates", latitude: contact.coords.lat, longitude: contact.coords.lng },
+    geo: { "@type": "GeoCoordinates", latitude: s.map.lat, longitude: s.map.lng },
     hasMap: s.mapsHref,
     areaServed: { "@type": "Country", name: "Srbija" },
     openingHoursSpecification: s.week

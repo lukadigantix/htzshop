@@ -5,8 +5,8 @@ import KontaktForma from "@/components/kontakt/KontaktForma";
 import Mapa from "@/components/kontakt/Mapa";
 import { Kopiraj, RadnoVremeTabela, StatusRadnje } from "@/components/kontakt/Radnja";
 import { ArrowRight, Facebook, Instagram, Mail, Phone, Pin } from "@/components/Icons";
-import { companySteps, contact, printMethods } from "@/data/site";
-import { getSajt } from "@/lib/sajt";
+import { companySteps, printMethods } from "@/data/site";
+import { getSajt, iznos } from "@/lib/sajt";
 import Razdvajac from "@/components/Razdvajac";
 
 /*
@@ -35,7 +35,7 @@ export default async function KontaktPage() {
     { href: s.facebook, label: "Facebook", Icon: Facebook },
     { href: s.instagram, label: "Instagram", Icon: Instagram },
   ].filter((m) => m.href);
-  const navigacija = `https://www.google.com/maps/dir/?api=1&destination=${contact.coords.lat},${contact.coords.lng}`;
+  const navigacija = `https://www.google.com/maps/dir/?api=1&destination=${s.map.lat},${s.map.lng}`;
 
   const brzo = [
     { kicker: "Pozovite", vrednost: s.phone, opis: "Savet pri izboru opreme i veličine", href: s.phoneHref, Icon: Phone },
@@ -44,12 +44,12 @@ export default async function KontaktPage() {
   ];
 
   const podaci = [
-    { label: "Poslovno ime", vrednost: contact.legalName },
+    { label: "Poslovno ime", vrednost: s.legalName },
     { label: "Adresa", vrednost: `${s.street}, ${s.city}` },
     { label: "PIB", vrednost: s.pib },
     { label: "Matični broj", vrednost: s.mb },
-    // „Banca Intesa 160-492241-81": banka ide u naziv polja, kopira se samo broj računa
-    { label: "Tekući račun", banka: contact.bank.replace(/\s+\S+$/, ""), vrednost: contact.bank.split(" ").at(-1) ?? "" },
+    // banka ide u naziv polja, kopira se samo broj računa; račun samo kada je prikaz uključen u adminu (Podešavanja → Firma)
+    { label: "Tekući račun", banka: s.bank?.name ?? "", vrednost: s.bank?.account ?? "" },
     { label: "E-mail", vrednost: s.email },
   ].filter((p) => p.vrednost);
 
@@ -66,7 +66,7 @@ export default async function KontaktPage() {
       q: "Koliko košta dostava?",
       a: (
         <>
-          Isporuka je besplatna za porudžbine iznad {contact.freeShippingFrom}. Ostale uslove i načine plaćanja pogledajte na stranici{" "}
+          {s.freeShippingFrom ? `Isporuka je besplatna za porudžbine iznad ${iznos(s.freeShippingFrom)}.` : "Cena dostave zavisi od načina dostave i težine pošiljke i vidi se u korpi pre poručivanja."} Ostale uslove i načine plaćanja pogledajte na stranici{" "}
           <Link href="/placanje-i-isporuka/" className="text-primary underline underline-offset-2">Plaćanje i isporuka</Link>.
         </>
       ),
@@ -117,7 +117,7 @@ export default async function KontaktPage() {
                 <span className="text-[12px] uppercase tracking-[0.18em] text-white/60">Kontakt</span>
                 <StatusRadnje week={s.week} tamno />
               </div>
-              <h1 className="mt-6 text-[44px] font-medium leading-[1.02] tracking-[-0.03em] md:text-[64px] xl:text-[84px]">
+              <h1 className="mt-6 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">
                 Razgovarajmo o opremi <span className="text-brand">za vaš tim.</span>
               </h1>
               <p className="mt-6 max-w-[560px] text-[16px] leading-[26px] text-white/70 md:text-[17px] md:leading-[28px]">
@@ -196,7 +196,7 @@ export default async function KontaktPage() {
         <section id="mapa" className="container-site scroll-mt-24">
           <div className="relative overflow-hidden rounded-[4px] bg-surface">
             <div className="h-[380px] md:h-[480px] lg:h-[600px]">
-              <Mapa name={s.name} />
+              <Mapa name={s.name} tacka={s.map} />
             </div>
 
             <div className="border-t border-subtle p-6 md:p-8 lg:absolute lg:left-6 lg:top-6 lg:w-[400px] lg:rounded-[4px] lg:border-0 lg:bg-surface lg:shadow-[0_30px_60px_-30px_rgba(32,33,36,0.45)]">
@@ -274,7 +274,7 @@ export default async function KontaktPage() {
             </div>
             <div className="border-t border-subtle">
               {pitanja.map((p) => (
-                <details key={p.q} className="group border-b border-subtle">
+                <details key={p.q} name="cesta-pitanja" className="group border-b border-subtle">
                   <summary className="flex list-none items-center justify-between gap-6 py-5 text-[17px] font-medium leading-snug md:py-6 md:text-[18px] [&::-webkit-details-marker]:hidden">
                     {p.q}
                     <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-subtle transition group-open:border-brand group-open:bg-brand">

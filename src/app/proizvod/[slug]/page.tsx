@@ -2,16 +2,18 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Putanja from "@/components/Putanja";
 import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import Galerija from "@/components/proizvod/Galerija";
 import Kupovina from "@/components/proizvod/Kupovina";
 import Varijante from "@/components/proizvod/Varijante";
-import { ArrowRight, ChevronRight, Phone, Printer, Store, Truck } from "@/components/Icons";
-import { categoryHref, contact, formatPrice } from "@/data/site";
+import { ArrowRight, Phone, Printer, Store, Truck } from "@/components/Icons";
+import { categoryHref, formatPrice } from "@/data/site";
 import { getProizvod, lokalniSlugovi } from "@/lib/proizvod";
-import { getSajt } from "@/lib/sajt";
+import { getSajt, iznos } from "@/lib/sajt";
 import Razdvajac from "@/components/Razdvajac";
+import { bezOptimizacije } from "@/lib/slike";
 
 /*
   Stranica proizvoda, u stilu naslovne (Pitbike): galerija levo na beloj površini, desno lepljiv panel
@@ -93,23 +95,11 @@ async function Proizvod({ params }: { params: PageProps<"/proizvod/[slug]">["par
     <>
       <main className="pb-16 md:pb-24">
         {/* putanja */}
-        <nav aria-label="Putanja" className="container-site">
-          <ol className="no-scrollbar flex items-center gap-1.5 overflow-x-auto whitespace-nowrap py-4 text-[13px] text-secondary md:py-6">
-            <li><Link href="/" className="hover:text-primary">Početna</Link></li>
-            {p.group && (
-              <>
-                <li aria-hidden><ChevronRight width={12} height={12} strokeWidth={1.8} /></li>
-                <li><Link href={categoryHref(p.group.slug)} className="hover:text-primary">{p.group.name}</Link></li>
-              </>
-            )}
-            <li aria-hidden><ChevronRight width={12} height={12} strokeWidth={1.8} /></li>
-            <li aria-current="page" className="truncate text-primary">{p.name}</li>
-          </ol>
-        </nav>
+        <Putanja stavke={[...(p.group ? [{ label: p.group.name, href: categoryHref(p.group.slug) }] : []), { label: p.name }]} />
 
-        {/* galerija + panel za kupovinu */}
-        <section className="container-site grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-12 xl:grid-cols-[minmax(0,1fr)_480px] xl:gap-16">
-          <Galerija images={p.images.length ? p.images : ["/images/logo/htz-logo.svg"]} alt={p.name} badges={p.badges} />
+        {/* galerija (kvadratna slika) + panel za kupovinu, pola-pola */}
+        <section className="container-site mt-6 grid grid-cols-1 gap-8 md:mt-8 lg:grid-cols-2">
+          <Galerija key={p.slug} images={p.images.length ? p.images : ["/images/logo/htz-logo.svg"]} alt={p.name} badges={p.badges} />
 
           <div className="lg:sticky lg:top-28 lg:self-start">
             <p className="eyebrow">
@@ -185,7 +175,9 @@ async function Proizvod({ params }: { params: PageProps<"/proizvod/[slug]">["par
                 <Truck width={20} height={20} strokeWidth={1.6} className="mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium">{p.shippingLabel ?? "Dostava širom Srbije"}</p>
-                  <p className="text-secondary">Besplatna isporuka za porudžbine iznad {contact.freeShippingFrom}.</p>
+                  <p className="text-secondary">
+                    {sajt.freeShippingFrom ? `Besplatna isporuka za porudžbine iznad ${iznos(sajt.freeShippingFrom)}.` : "Cena dostave se računa u korpi, pre poručivanja."}
+                  </p>
                 </div>
               </li>
               <li className="flex gap-4 p-4 md:px-5">
@@ -225,9 +217,9 @@ async function Proizvod({ params }: { params: PageProps<"/proizvod/[slug]">["par
           </div>
         </section>
 
-        {/* opis i tehnički podaci */}
+        {/* opis i tehnički podaci: isti razmak od galerije kao između kolona (32px) */}
         {(imaOpis || imaSpecifikacije) && (
-          <section className="container-site mt-16 md:mt-24">
+          <section className="container-site mt-8">
             <div className={`grid grid-cols-1 gap-4 lg:gap-8 ${imaOpis && imaSpecifikacije ? "lg:grid-cols-2" : ""}`}>
               {imaOpis && (
                 <div className="rounded-[4px] bg-surface p-6 md:p-10">
@@ -260,7 +252,7 @@ async function Proizvod({ params }: { params: PageProps<"/proizvod/[slug]">["par
             <div className={`grid grid-cols-1 gap-4 lg:gap-8 ${p.advantagesImage ? "lg:grid-cols-[1fr_1.15fr]" : ""}`}>
               {p.advantagesImage && (
                 <div className="relative min-h-[320px] overflow-hidden rounded-[4px] bg-surface md:min-h-[420px]">
-                  <Image src={p.advantagesImage} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" unoptimized className="object-cover" />
+                  <Image src={p.advantagesImage} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" unoptimized={bezOptimizacije(p.advantagesImage)} className="object-cover" />
                 </div>
               )}
               <div className="rounded-[4px] bg-surface p-6 md:p-10 xl:p-14">

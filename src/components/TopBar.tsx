@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { contact } from "@/data/site";
-import { getSajt } from "@/lib/sajt";
+import { getSajt, iznos } from "@/lib/sajt";
 import { StatusRadnje } from "./kontakt/Radnja";
 import Poruke from "./topbar/Poruke";
 import { Phone } from "./Icons";
@@ -11,8 +10,9 @@ import { Phone } from "./Icons";
   Do 1024 px: telefon levo, status desno; od 1024 px status i telefon levo, linkovi desno; od 1280 px i poruke u sredini.
 */
 
-const poruke = [
-  `Besplatna isporuka za porudžbine iznad ${contact.freeShippingFrom}`,
+// Besplatna isporuka samo kada je u adminu zadat prag (Isporuka → načini dostave)
+const porukeZa = (besplatnoOd: number | null) => [
+  ...(besplatnoOd ? [`Besplatna isporuka za porudžbine iznad ${iznos(besplatnoOd)}`] : []),
   "Brendiranje radne odeće u našoj radionici",
   "Ponude za firme i opremanje celih timova",
   "HTZ oprema vodećih evropskih brendova",
@@ -42,7 +42,7 @@ export default async function TopBar() {
         </div>
 
         <div className="hidden xl:block">
-          <Poruke poruke={poruke} />
+          <Poruke poruke={porukeZa(s.freeShippingFrom)} />
         </div>
 
         <div className="flex items-center justify-end">

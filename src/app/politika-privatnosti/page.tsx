@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Cookie, Download, Lock, ShieldCheck, UserCheck } from "lucide-react";
 import { OkvirUslova, PdfZaglavlje, PravniOdeljak, UkratkoUslova, UvodUslova } from "@/components/info/Uslovi";
-import { contact } from "@/data/site";
 import { PRIVATNOST_DONETO, PRIVATNOST_NA_SNAZI, PRIVATNOST_PDF } from "@/lib/dokumenti";
 import { getSajt } from "@/lib/sajt";
 import { jsonLd, SITE_URL } from "@/lib/seo";
@@ -140,7 +139,7 @@ export default async function PolitikaPrivatnostiPage() {
         <PravniOdeljak id="opste" broj={1} naslov="Opšte odredbe">
           <h3>Član 1</h3>
           <p>
-            Ovom politikom privatnosti (u daljem tekstu: Politika), u skladu sa Zakonom o zaštiti podataka o ličnosti, {contact.legalName} (u daljem tekstu:
+            Ovom politikom privatnosti (u daljem tekstu: Politika), u skladu sa Zakonom o zaštiti podataka o ličnosti, {s.legalName} (u daljem tekstu:
             Rukovalac) obaveštava korisnike sajta htzshop.rs i kupce (u daljem tekstu: vi) o tome koje podatke o ličnosti prikuplja, u koje svrhe, na kom pravnom
             osnovu, kome ih prosleđuje, koliko ih čuva i koja prava imate.
           </p>
@@ -163,7 +162,7 @@ export default async function PolitikaPrivatnostiPage() {
           <h3>Član 3</h3>
           <p>Rukovalac vašim podacima je:</p>
           <p>
-            <b>{contact.legalName}</b>
+            <b>{s.legalName}</b>
             <br />
             {s.street}, {s.city}, Republika Srbija
             <br />
@@ -245,7 +244,7 @@ export default async function PolitikaPrivatnostiPage() {
           <h3>Član 7</h3>
           <p>Vaše podatke ne prodajemo i ne ustupamo trećim licima radi reklamiranja. Podatke prosleđujemo samo u meri potrebnoj za određenu svrhu:</p>
           <ul>
-            <li>kurirskim službama (npr. BEX, Post Express): ime, adresu, telefon i iznos za naplatu pouzećem, radi isporuke pošiljke;</li>
+            <li>kurirskoj službi (D Express): ime, adresu, telefon i iznos za naplatu pouzećem, radi isporuke pošiljke;</li>
             <li>bankama i platnim institucijama, radi izvršenja i evidentiranja uplata i povraćaja novca;</li>
             <li>knjigovodstvenoj agenciji, radi vođenja poslovnih knjiga i poreskih obaveza;</li>
             <li>
@@ -339,7 +338,7 @@ export default async function PolitikaPrivatnostiPage() {
           <p>
             U Svilajncu, doneto {PRIVATNOST_DONETO} Na snazi od {PRIVATNOST_NA_SNAZI}
             <br />
-            {contact.legalName}
+            {s.legalName}
           </p>
         </PravniOdeljak>
       </OkvirUslova>

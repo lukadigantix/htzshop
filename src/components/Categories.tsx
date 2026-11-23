@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { categoryGroups, type CategoryGroup, type GroupTile } from "@/data/site";
+import { type CategoryGroup, type GroupTile } from "@/data/site";
+import { getBlokovi } from "@/lib/grupe";
 
 /*
   Mreža po uzoru na fristads.com „Featured products": puna širina, razmak 1 px (bela linija),
@@ -50,10 +51,12 @@ function Group({ g }: { g: CategoryGroup }) {
   );
 }
 
-export default function Categories() {
+// Grupe, nazivi i broj artikala iz admina (lib/grupe.ts)
+export default async function Categories() {
+  const blokovi = await getBlokovi();
   return (
     <section id="kategorije" className="space-y-16 bg-white pt-14 md:space-y-[96px] md:pt-[72px]">
-      {categoryGroups.map((g) => (
+      {blokovi.map((g) => (
         <Group key={g.key} g={g} />
       ))}
     </section>

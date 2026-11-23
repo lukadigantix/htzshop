@@ -1,5 +1,6 @@
-// Sav sadržaj početne stranice HTZ Shop-a. Podaci su preuzeti sa htzshop.rs (26.10.2026).
-// Brojevi artikala po kategoriji su stanje prodavnice tog dana.
+// Rezervni podaci prodavnice i uređivački sadržaj. Kontakt, podaci firme, grupe, brendovi, brojke i prag dostave stižu iz
+// admina (lib/sajt.ts, lib/grupe.ts, lib/brendovi.ts); ovo se koristi samo kada polje u adminu nije popunjeno ili backend
+// ne odgovara. Brojevi artikala po kategoriji su sa starog sajta (26.10.2026) i ne prikazuju se.
 
 export const contact = {
   name: "HTZ Shop",
@@ -19,15 +20,10 @@ export const contact = {
   ],
   pib: "110276071",
   mb: "64777858",
-  // Račun u Banca Intesi (160-492241-81) je ugašen 6. 6. 2026; aktivni računi su u Raiffeisen banci. Dok firma ne potvrdi
-  // koji je za uplate kupaca, sajt ne prikazuje račun. Format: „Naziv banke broj-računa".
-  bank: "",
   founded: 2017,
   facebook: "https://www.facebook.com/profile.php?id=100064679481924",
   instagram: "https://instagram.com/htz_oprema_Shop",
-  freeShippingFrom: "8.000 RSD",
-  totalProducts: 359,
-  // Radnja na mapi (Karađorđeva 24, OpenStreetMap). Ako se adresa u adminu promeni, treba promeniti i ovo.
+  // Radnja na mapi (Karađorđeva 24); u adminu: Podešavanja → Firma
   coords: { lat: 44.23167, lng: 21.2008 },
 };
 
@@ -210,27 +206,6 @@ export const printMethods = [
   { name: "DTF štampa", text: "Za sve vrste odeće, torbi i uniformi. Ultra tanak otisak koji je rastegljiv i postojan na pranje.", za: "Odeća, torbe i uniforme" },
 ];
 
-export const footerLinks = {
-  info: [
-    { name: "Plaćanje i isporuka", href: "/placanje-i-isporuka/" },
-    { name: "Kako naručiti", href: "/kako-naruciti/" },
-    { name: "Pravo na odustajanje", href: "/pravo-na-odustajanje/" },
-    { name: "Reklamacija proizvoda", href: "/reklamacija-proizvoda/" },
-    { name: "Povraćaj novca i robe", href: "/povracaj-novca/" },
-    { name: "Politika privatnosti", href: "/politika-privatnosti/" },
-    { name: "Uslovi korišćenja", href: "/uslovi-koriscenja/" },
-  ],
-  shop: [
-    { name: "Prodavnica", href: "/prodavnica/" },
-    { name: "Brendiranje odeće", href: "/brendiranje-odece/" },
-    { name: "Brendovi", href: "/brendovi/" },
-    { name: "O nama", href: "/o-nama/" },
-    { name: "Kontakt", href: "/kontakt/" },
-    { name: "Status porudžbine", href: "/status-porudzbine/" },
-    { name: "Moj nalog", href: "/moj-nalog/" },
-  ],
-};
-
 export const formatPrice = (n: number) => n.toLocaleString("sr-RS").replace(/,/g, ".") + " RSD";
 
 // Grupe kategorija za početnu: svaka grupa je jedan blok (fotografija + 2×2 pločice) sa naslovom i tekstom.
@@ -249,58 +224,6 @@ export type CategoryGroup = {
   tiles: GroupTile[];
 };
 
-const catTile = (slug: string): GroupTile => {
-  const c = categories.find((x) => x.slug === slug)!;
-  return { name: c.name, sub: `${c.count} artikala`, image: c.image, href: categoryHref(c.slug) };
-};
-
-export const categoryGroups: CategoryGroup[] = [
-  {
-    key: "odeca",
-    title: "Radna odeća i obuća",
-    menuTitle: "Odeća i obuća",
-    allLabel: "Sva radna odeća i obuća",
-    allHref: "/prodavnica/?grupa=odeca-i-obuca",
-    text: "Odeća, obuća i rukavice koje izdrže svaki radni dan. Brendovi Cerva, Emerton, Cofra i Dunlop, sve veličine na lageru u Svilajncu.",
-    photo: "/images/photo/brendiranje.jpg",
-    photoAlt: "Radnici u radnim uniformama",
-    photoPosition: "center 40%",
-    photoSide: "left",
-    tiles: [
-      catTile("zastitna-i-radna-odeca"),
-      catTile("zastitna-i-radna-obuca"),
-      catTile("zastitne-i-radne-rukavice"),
-      { name: "Brendiranje odeće", sub: "Štampa vašeg logotipa", image: "/images/products/muska-majica.png", href: "/brendiranje-odece/" },
-    ],
-  },
-  {
-    key: "zastita",
-    title: "Lična zaštita",
-    menuTitle: "Lična zaštita",
-    allLabel: "Sva lična zaštita",
-    allHref: "/prodavnica/?grupa=licna-zastita",
-    text: "Šlemovi, naočare i viziri, maske i filteri, antifoni i čepići. Sertifikovano po EN standardima, od proizvođača kao što su 3M, uvex i Climax.",
-    photo: "/images/photo/naocare.jpg",
-    photoAlt: "Radnik namešta zaštitne naočare",
-    photoPosition: "55% center",
-    photoSide: "right",
-    tiles: [catTile("zastita-glave"), catTile("zastita-ociju-i-lica"), catTile("zastita-disajnih-organa"), catTile("zastita-sluha")],
-  },
-  {
-    key: "bezbednost",
-    title: "Rad na visini, zavarivanje i bezbednost",
-    menuTitle: "Visina, zavarivanje, bezbednost",
-    allLabel: "Sva oprema za bezbednost",
-    allHref: "/prodavnica/?grupa=bezbednost",
-    text: "Protivpadni kompleti i gurtne, oprema za zavarivače, jednokratne rukavice i maske, prva pomoć i saobraćajna signalizacija za gradilište i pogon.",
-    photo: "/images/photo/slide-zavarivanje.jpg",
-    photoAlt: "Varilac sa zaštitnom maskom",
-    photoPosition: "center 40%",
-    photoSide: "left",
-    tiles: [catTile("zastita-od-pada"), catTile("zastita-za-zavarivanje"), catTile("oprema-i-bezbednost"), catTile("jednokratna-zastitna-oprema")],
-  },
-];
-
 // Hero slajder: smenjuju se najjače kategorije sa opisom (uzor fristads.com).
 // Slajdovi se unose u admin panelu (Podešavanja → Baneri) i stižu preko API-ja (lib/api.ts).
 export type HeroSlide = {
@@ -316,58 +239,31 @@ export type HeroSlide = {
   imagePosition?: string;
   // Prelaz odozdo nagore iza teksta (CSS background, boja i jačina iz admina)
   fade: string;
+  /** logo brenda i oznaka (npr. „Sponzorisano") iznad malog teksta */
+  logo?: string;
+  badge?: string;
+  /** fontovi teksta iz admina (ključevi iz lib/fontovi-slajda.ts); bez njih font sajta */
+  fonts?: { eyebrow?: string; title?: string; text?: string };
+  /** boje glavnog dugmeta iz admina; bez njih žuto dugme sajta */
+  ctaColors?: { bg?: string; text?: string };
+  /** istaknuti proizvod: kartica gore desno (naziv, slika i cena iz artikla) */
+  product?: { name: string; href: string; image: string | null; price: number; oldPrice: number | null; hideOnMobile: boolean };
 };
 
 // Mega-meni po uzoru na pitbike.vercel.app: velika slika, naziv, podnaslov, dugme + link, na dnu link „Sve …"
-export type MegaItem = { name: string; sub: string; image: string; href: string };
-export type MegaMenu = { key: string; label: string; allLabel: string; allHref: string; items: MegaItem[] };
-
-const cat = (slug: string) => categories.find((c) => c.slug === slug)!;
-const megaCat = (slug: string, name?: string): MegaItem => ({ name: name ?? cat(slug).name, sub: `${cat(slug).count} artikala`, image: cat(slug).image, href: categoryHref(slug) });
-
-export const megaMenus: MegaMenu[] = [
-  {
-    key: "odeca",
-    label: "Odeća i obuća",
-    allLabel: "Sva radna odeća i obuća",
-    allHref: "/prodavnica/",
-    items: [
-      megaCat("zastitna-i-radna-odeca", "Radna odeća"),
-      megaCat("zastitna-i-radna-obuca", "Zaštitna obuća"),
-      megaCat("zastitne-i-radne-rukavice", "Rukavice"),
-      { name: "Brendiranje odeće", sub: "Sito, flex i DTF štampa", image: "/images/products/muska-majica.png", href: "/brendiranje-odece/" },
-    ],
-  },
-  {
-    key: "zastita",
-    label: "Lična zaštita",
-    allLabel: "Sva lična zaštita",
-    allHref: "/prodavnica/",
-    items: [megaCat("zastita-glave"), megaCat("zastita-ociju-i-lica"), megaCat("zastita-disajnih-organa"), megaCat("zastita-sluha")],
-  },
-  {
-    key: "bezbednost",
-    label: "Bezbednost",
-    allLabel: "Sva oprema za bezbednost",
-    allHref: "/prodavnica/",
-    items: [megaCat("zastita-od-pada"), megaCat("zastita-za-zavarivanje"), megaCat("oprema-i-bezbednost"), megaCat("jednokratna-zastitna-oprema", "Jednokratna oprema")],
-  },
-];
-
-// Kartice „Radna odeća i obuća" (sekcija 3)
-export const wearCards = [
-  { name: "Radna odeća", text: "Bluze, pantalone i polukombinezoni. Cerva, Emerton, Desman.", image: "/images/cats/odeca.jpg", href: categoryHref("zastitna-i-radna-odeca") },
-  { name: "Zaštitna obuća", text: "Cipele i čizme klase S1 do S3, sa čeličnom ili kompozitnom kapom.", image: "/images/cats/obuca.jpg", href: categoryHref("zastitna-i-radna-obuca") },
-  { name: "Rukavice", text: "Radne, zaštitne, protiv prosecanja i za zavarivanje.", image: "/images/cats/rukavice.jpg", href: categoryHref("zastitne-i-radne-rukavice") },
-];
-
-// Karusel „Zaštita za svaki posao" (sekcija 5)
-export const protectionCards = ["zastita-glave", "zastita-ociju-i-lica", "zastita-disajnih-organa", "zastita-sluha", "zastita-od-pada", "zastita-za-zavarivanje", "oprema-i-bezbednost", "jednokratna-zastitna-oprema"].map((s) => ({
-  name: cat(s).name,
-  count: cat(s).count,
-  image: cat(s).image,
-  href: categoryHref(s),
-}));
+export type MegaItem = {
+  name: string;
+  sub: string;
+  image: string;
+  href: string;
+  /** fotografija (popunjava sličicu) umesto artikla na beloj podlozi */
+  foto?: boolean;
+  /** podgrupe (redom iz admina) sa slikom preporučenog artikla */
+  subs?: { name: string; href: string; count: number | null; image: string | null }[];
+};
+/** tamna kartica desno u mega-meniju (brendiranje, pomoć pri izboru, ponuda za firme) */
+export type MegaPromo = { kicker: string; title: string; text: string; cta: string; href: string; image: string };
+export type MegaMenu = { key: string; label: string; allLabel: string; allHref: string; items: MegaItem[]; promo?: MegaPromo };
 
 // „Za firme i timove" (sekcija 8)
 export const companySteps = [
@@ -375,12 +271,3 @@ export const companySteps = [
   { title: "Dobijate kompletnu ponudu", meta: "sa brendiranjem i rokom isporuke", tag: "Korak 2" },
   { title: "Isporuka na adresu firme", meta: "kurirom ili preuzimanje u Svilajncu", tag: "Korak 3" },
 ];
-
-// „O nama": brojke sa originalne stranice O nama (klijentove tvrdnje: 1000 artikala, 8000 MP kupaca) + ono što smo izbrojali
-export const aboutStats = [
-  { value: "2017.", label: "godina osnivanja" },
-  { value: "1.000+", label: "artikala u ponudi" },
-  { value: "18", label: "evropskih brendova" },
-  { value: "8.000+", label: "zadovoljnih kupaca" },
-];
-export const mapsHref = "https://www.google.com/maps/search/?api=1&query=Kara%C4%91or%C4%91eva+24%2C+Svilajnac";

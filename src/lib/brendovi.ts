@@ -1,4 +1,5 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import { brands as lokalniLogotipi } from "@/data/site";
 import { API_URL, fileUrl } from "./api";
 
@@ -41,7 +42,8 @@ export function lepoIme(name: string) {
 /** Aktivni brendovi, najviše proizvoda prvo. `null` = backend ne odgovara. */
 export async function getBrendovi(): Promise<Brend[] | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const [lista, fasete] = await Promise.all([procitaj<ApiBrend[]>("/brands/active"), procitaj<{ brands: { id: string; count: number | string }[] }>("/filters?groupByModel=true")]);
   if (!lista) return null;
   const broj = new Map((fasete?.brands ?? []).map((b) => [b.id, Number(b.count) || 0]));

@@ -309,7 +309,7 @@ export default async function KakoNarucitiPage() {
           <div className="mt-10 grid gap-12 md:mt-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-end xl:gap-20">
             <div className="hero-in max-w-[820px]">
               <p className="text-[12px] uppercase tracking-[0.18em] text-white/55">Kako naručiti</p>
-              <h1 className="mt-5 text-[42px] font-medium leading-[1.03] tracking-[-0.03em] md:text-[64px] xl:text-[80px]">
+              <h1 className="mt-5 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">
                 Poručivanje u četiri koraka, <span className="text-brand">bez registracije.</span>
               </h1>
               <p className="mt-6 max-w-[600px] text-[16px] leading-[27px] text-white/70 md:text-[17px] md:leading-[28px]">
@@ -546,7 +546,7 @@ export default async function KakoNarucitiPage() {
           </div>
           <div className="border-t border-subtle">
             {pitanja.map((p) => (
-              <details key={p.q} className="group border-b border-subtle">
+              <details key={p.q} name="cesta-pitanja" className="group border-b border-subtle">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-medium leading-snug md:py-6 md:text-[18px] [&::-webkit-details-marker]:hidden">
                   {p.q}
                   <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-subtle transition group-open:border-brand group-open:bg-brand">

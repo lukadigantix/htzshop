@@ -1,6 +1,9 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import { API_URL } from "./api";
 import { categories, productTabs, type Product } from "@/data/site";
+import { urediOpis } from "./opis";
+import { slikeZaBoju } from "./slike-boja";
 
 /**
  * Stranica proizvoda: `GET /products/slug/:slug` (artikal + varijante istog modela + slični).
@@ -47,6 +50,8 @@ type ApiProizvod = {
   brand: { name: string; slug: string } | null;
   groups?: { name: string; slug: string }[];
   images: string[];
+  /** boja predmeta na svakoj slici (#rrggbb), samo za modele sa više boja */
+  imageColors?: (string | null)[] | null;
   image: string | null;
   priceDisplay: { price: number | null; basePrice: number | null; label: string } | null;
   inStock: boolean;
@@ -99,10 +104,10 @@ function izApi(p: ApiProizvod): Proizvod {
     slug: p.slug,
     code: p.code,
     name: p.name,
-    description: p.description,
+    description: urediOpis(p.description),
     brand: p.brand ? { name: p.brand.name, slug: p.brand.slug } : null,
     group: p.groups?.[0] ? { name: p.groups[0].name, slug: p.groups[0].slug } : null,
-    images: p.images,
+    images: slikeZaBoju(p.images, p.imageColors, (p.variants ?? []).flatMap((v) => (v.color ? [v.color] : [])), p.color),
     price: p.priceDisplay?.price ?? null,
     basePrice: p.priceDisplay?.basePrice ?? null,
     priceLabel: p.priceDisplay?.label ?? "sa PDV-om",
@@ -168,7 +173,8 @@ function izLokalnih(slug: string): Proizvod | null {
 
 async function fetchProizvod(slug: string): Promise<Proizvod | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const r = await fetch(`${API_URL}/products/slug/${encodeURIComponent(slug)}`, { signal: AbortSignal.timeout(8_000) });
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`Proizvod ${slug}: HTTP ${r.status}`);

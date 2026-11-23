@@ -1,4 +1,5 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import type { HeroSlide } from "@/data/site";
 
 // Backend (htz-shop-backend). Server-side poziv, pa adresa nije javna promenljiva.
@@ -23,6 +24,16 @@ type ApiSlide = {
   // Boja prelaza (#rrggbb) i jačina 0–100 (null = 100)
   fadeColor: string | null;
   fadeOpacity: number | null;
+  logoUrl: string | null;
+  badgeText: string | null;
+  kickerFont: string | null;
+  titleFont: string | null;
+  subtitleFont: string | null;
+  buttonColor: string | null;
+  buttonTextColor: string | null;
+  hideProductOnMobile?: boolean;
+  // istaknuti proizvod (backend šalje samo uključen artikal sa cenom, na stanju)
+  product?: { name: string; slug: string; image: string | null; price: number | null; oldPrice: number | null } | null;
 };
 
 // Prelaz odozdo nagore iza teksta, preko cele visine slajdera: skoro puna boja dole (95%), tamno do trećine (85%),
@@ -42,7 +53,8 @@ export const fileUrl = (url: string) => (/^https?:\/\//i.test(url) ? url : `${AP
 // Aktivni slajdovi naslovne (Admin → Podešavanja → Baneri), redom kao u adminu
 async function fetchHeroSlides(): Promise<HeroSlide[]> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const res = await fetch(`${API_URL}/slider`);
   if (!res.ok) throw new Error(`Slajdovi: HTTP ${res.status}`);
   const { data } = (await res.json()) as { data: ApiSlide[] };
@@ -60,6 +72,21 @@ async function fetchHeroSlides(): Promise<HeroSlide[]> {
       imageAlt: s.imageAlt ?? "",
       imagePosition: s.imagePosition ?? undefined,
       fade: fadeBackground(s.fadeColor, s.fadeOpacity),
+      logo: s.logoUrl ? fileUrl(s.logoUrl) : undefined,
+      badge: s.badgeText ?? undefined,
+      fonts: s.kickerFont || s.titleFont || s.subtitleFont ? { eyebrow: s.kickerFont ?? undefined, title: s.titleFont ?? undefined, text: s.subtitleFont ?? undefined } : undefined,
+      ctaColors: s.buttonColor || s.buttonTextColor ? { bg: s.buttonColor ?? undefined, text: s.buttonTextColor ?? undefined } : undefined,
+      product:
+        s.product && s.product.price != null
+          ? {
+              name: s.product.name,
+              href: `/proizvod/${s.product.slug}/`,
+              image: s.product.image ? fileUrl(s.product.image) : null,
+              price: s.product.price,
+              oldPrice: s.product.oldPrice,
+              hideOnMobile: Boolean(s.hideProductOnMobile),
+            }
+          : undefined,
     }));
 }
 

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Banknote, CalendarDays, Download, FileText, ShieldCheck } from "lucide-react";
 import { OkvirUslova, PdfZaglavlje, PravniOdeljak, UkratkoUslova, UvodUslova } from "@/components/info/Uslovi";
-import { contact } from "@/data/site";
 import { USLOVI_DONETO, USLOVI_NA_SNAZI, USLOVI_PDF } from "@/lib/dokumenti";
 import { REKLAMACIJA_ROK_DANA } from "@/lib/nalog-deo";
 import { getSajt } from "@/lib/sajt";
@@ -46,7 +45,7 @@ const ODELJCI = [
 
 export default async function UsloviKoriscenjaPage() {
   const s = await getSajt();
-  const prodavac = `${contact.legalName}, ${s.street}, ${s.city}, Republika Srbija, matični broj: ${s.mb}, PIB: ${s.pib}`;
+  const prodavac = `${s.legalName}, ${s.street}, ${s.city}, Republika Srbija, matični broj: ${s.mb}, PIB: ${s.pib}`;
   const mail = <a href={`mailto:${s.email}`}>{s.email}</a>;
   const tel = <a href={s.phoneHref}>{s.phone}</a>;
 
@@ -411,7 +410,7 @@ export default async function UsloviKoriscenjaPage() {
           <p>
             U Svilajncu, doneto {USLOVI_DONETO} Na snazi od {USLOVI_NA_SNAZI}
             <br />
-            {contact.legalName}
+            {s.legalName}
           </p>
         </PravniOdeljak>
       </OkvirUslova>

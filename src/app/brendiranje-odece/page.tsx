@@ -5,7 +5,7 @@ import Proba from "@/components/brendiranje/Proba";
 import KontaktForma from "@/components/kontakt/KontaktForma";
 import ProductCard from "@/components/ProductCard";
 import { ArrowRight, Mail, Phone } from "@/components/Icons";
-import { categoryHref, contact, printMethods, productTabs } from "@/data/site";
+import { categoryHref, printMethods, productTabs } from "@/data/site";
 import { getSajt } from "@/lib/sajt";
 import { jsonLd, SITE_URL } from "@/lib/seo";
 
@@ -56,7 +56,7 @@ export default async function BrendiranjePage() {
     },
     {
       q: "Koliko košta brendiranje odeće?",
-      a: `Cena zavisi od tehnike, veličine logoa, broja boja i količine. Za tačnu cenu pozovite ${contact.phone2} ili pišite na ${s.email}, a ponudu šaljemo zajedno sa cenom odeće.`,
+      a: `Cena zavisi od tehnike, veličine logoa, broja boja i količine. Za tačnu cenu pozovite ${s.phone2} ili pišite na ${s.email}, a ponudu šaljemo zajedno sa cenom odeće.`,
     },
     {
       q: "Šta je potrebno da pošaljem za ponudu?",
@@ -119,7 +119,7 @@ export default async function BrendiranjePage() {
               <span aria-hidden className="mx-2">/</span>
               <span className="text-white/80">Brendiranje odeće</span>
             </nav>
-            <h1 className="mt-6 text-[42px] font-medium leading-[1.02] tracking-[-0.03em] md:text-[60px] xl:text-[68px]">
+            <h1 className="mt-6 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">
               Brendiranje radne odeće <span className="text-brand">logom vaše firme.</span>
             </h1>
             <p className="mt-6 max-w-[540px] text-[16px] leading-[26px] text-white/70 md:text-[17px] md:leading-[28px]">
@@ -131,9 +131,9 @@ export default async function BrendiranjePage() {
                 Zatražite ponudu
                 <ArrowRight width={15} height={15} strokeWidth={1.8} />
               </a>
-              <a href={contact.phone2Href} className="inline-flex h-[50px] items-center gap-2.5 rounded-full border border-white/20 px-6 text-[15px] font-medium transition hover:border-white">
+              <a href={s.phone2Href} className="inline-flex h-[50px] items-center gap-2.5 rounded-full border border-white/20 px-6 text-[15px] font-medium transition hover:border-white">
                 <Phone width={17} height={17} strokeWidth={1.6} />
-                {contact.phone2}
+                {s.phone2}
               </a>
             </div>
 
@@ -270,13 +270,13 @@ export default async function BrendiranjePage() {
               Odgovaramo radnim danom, sa ponudom za odeću i štampu zajedno. Logo i primere priložite uz poruku, a u tekstu navedite odeću, količinu i poziciju.
             </p>
             <div className="mt-8 divide-y divide-subtle overflow-hidden rounded-[6px] bg-surface">
-              <a href={contact.phone2Href} className="group flex items-center gap-4 p-5 transition hover:bg-brand-soft">
+              <a href={s.phone2Href} className="group flex items-center gap-4 p-5 transition hover:bg-brand-soft">
                 <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-on-brand">
                   <Phone width={19} height={19} strokeWidth={1.6} />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[13px] text-secondary">Telefon za brendiranje</span>
-                  <span className="block text-[19px] font-semibold">{contact.phone2}</span>
+                  <span className="block text-[19px] font-semibold">{s.phone2}</span>
                 </span>
               </a>
               <a href={`mailto:${s.email}?subject=${encodeURIComponent("Brendiranje odeće")}`} className="group flex items-center gap-4 p-5 transition hover:bg-brand-soft">
@@ -304,12 +304,12 @@ export default async function BrendiranjePage() {
             <p className="eyebrow">Brendiranje odeće</p>
             <h2 className="h-section mt-3">Česta pitanja</h2>
             <p className="p-muted mt-5 max-w-[420px] text-[15px]">
-              Niste našli odgovor? Pozovite <a href={contact.phone2Href} className="font-medium text-primary hover:underline">{contact.phone2}</a>.
+              Niste našli odgovor? Pozovite <a href={s.phone2Href} className="font-medium text-primary hover:underline">{s.phone2}</a>.
             </p>
           </div>
           <div className="border-t border-subtle">
             {pitanja.map((p) => (
-              <details key={p.q} className="group border-b border-subtle">
+              <details key={p.q} name="cesta-pitanja" className="group border-b border-subtle">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-medium leading-snug md:py-6 md:text-[18px] [&::-webkit-details-marker]:hidden">
                   {p.q}
                   <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-subtle transition group-open:border-brand group-open:bg-brand">

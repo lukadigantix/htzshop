@@ -12,6 +12,7 @@ import { RadnoVremeTabela } from "../kontakt/Radnja";
 import { ArrowRight } from "../Icons";
 import Koraci from "./Koraci";
 import Potvrda from "./Potvrda";
+import AdresaDostave from "./AdresaDostave";
 
 /*
   Naplata (po uzoru na klikdogume components/korpa/naplata.tsx, bez kartice - HTZ backend je nema):
@@ -212,10 +213,9 @@ export default function Naplata({ pocetni, kupon, sajt, korisnik, adrese }: Prop
               </fieldset>
             )}
 
-            <div key={adresaId} className={`mt-5 grid-cols-1 gap-4 sm:grid-cols-[1fr_140px_1fr] ${adresa ? "grid" : "hidden"}`}>
-              <Polje name="shippingAddress" label="Ulica i broj" autoComplete="street-address" defaultValue={sacuvana?.address} greska={greske.has("shippingAddress")} className="sm:col-span-3" />
-              <Polje name="shippingZipCode" label="Poštanski broj" inputMode="numeric" maxLength={5} autoComplete="postal-code" defaultValue={sacuvana?.zipCode} greska={greske.has("shippingZipCode")} />
-              <Polje name="shippingCity" label="Mesto" autoComplete="address-level2" defaultValue={sacuvana?.city} greska={greske.has("shippingCity")} className="sm:col-span-2" />
+            {/* mesto → ulica iz tog mesta → kućni broj, iz šifarnika kurira (D Express); sačuvana adresa ponovo crta polja (key) */}
+            <div key={adresaId} className={`mt-5 ${adresa ? "block" : "hidden"}`}>
+              <AdresaDostave pocetna={sacuvana} greske={greske} />
             </div>
 
             {adresa ? (

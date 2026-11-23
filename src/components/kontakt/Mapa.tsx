@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { Map, MapControls, MapMarker, MarkerContent, MarkerLabel, useMap } from "@/components/ui/map";
-import { contact } from "@/data/site";
 
 /*
   Mapa radnje (mapcn, MapLibre + OpenFreeMap podloga, bez API ključa). Sajt je samo svetao, pa je tema fiksna.
@@ -45,8 +44,9 @@ function MestoZaKarticu({ levo }: { levo: number }) {
 }
 
 /** `levo`: širina kartice preko leve strane mape od 1024 px (Kontakt); 0 kad kartice nema (O nama). */
-export default function Mapa({ name, levo = 440 }: { name: string; levo?: number }) {
-  const { lat, lng } = contact.coords;
+/** `tacka`: radnja na mapi iz admina (Podešavanja → Firma). */
+export default function Mapa({ name, tacka, levo = 440 }: { name: string; tacka: { lat: number; lng: number }; levo?: number }) {
+  const { lat, lng } = tacka;
   return (
     <Map theme="light" styles={{ light: PODLOGA }} center={[lng, lat]} zoom={15.5} cooperativeGestures attributionControl={{ compact: true }}>
       <Latinica />

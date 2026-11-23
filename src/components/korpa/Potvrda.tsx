@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Landmark, QrCode, Store, Truck, Wallet } from "lucide-react";
+import { Download, FileText, Landmark, QrCode, Store, Truck, Wallet } from "lucide-react";
 import { PLACANJE_NAZIV, type Porudzbina } from "@/lib/korpa-deo";
 import { rsd } from "@/lib/filteri";
 import type { Sajt } from "@/lib/sajt";
@@ -13,12 +13,18 @@ import Koraci from "./Koraci";
 /*
   Potvrda posle POST /orders, iz odgovora (gost kasnije ne može da je otvori - zato je sve bitno ovde i u mejlu).
   Uz plaćanje unapred (IPS, uplata na račun) backend vraća IPS QR kod i podatke za uplatu: QR za aplikaciju banke
-  i polja uplatnice sa „Kopiraj". Pouzeće i preuzimanje: šta sledi. Ispod stavke i iznosi.
+  i polja uplatnice sa „Kopiraj". Uz uplatu na račun i predračun (PDF: otvori ili preuzmi; isti je u prilogu mejla).
+  Pouzeće i preuzimanje: šta sledi. Ispod stavke i iznosi.
 */
+const datum = (d: string | null | undefined) => (d ? new Date(d).toLocaleDateString("sr-RS", { day: "numeric", month: "numeric", year: "numeric" }) : null);
+
 export default function Potvrda({ p, sajt, prijavljen }: { p: Porudzbina; sajt: Sajt; prijavljen: boolean }) {
   const unapred = p.paymentMethod !== "pouzece";
   const qr = p.ipsQr;
-  const rok = p.payBy ? new Date(p.payBy).toLocaleString("sr-RS", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" }) : null;
+  const pr = p.proforma;
+  const rok = p.payBy
+    ? new Date(p.payBy).toLocaleString("sr-RS", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" })
+    : datum(pr?.dueDate);
   const uplata = qr
     ? [
         { label: "Primalac", vrednost: qr.recipient },
@@ -31,7 +37,8 @@ export default function Potvrda({ p, sajt, prijavljen }: { p: Porudzbina; sajt: 
 
   return (
     <>
-      <Koraci aktivan={2} />
+      {/* sadržaj potvrde je centriran, pa i koraci */}
+      <Koraci aktivan={2} className="justify-center" />
       <div className="mx-auto mt-8 max-w-[880px]">
         <section className="overflow-hidden rounded-[6px] bg-surface shadow-[0_30px_60px_-40px_rgba(32,33,36,0.45)]">
           <div aria-hidden className="h-2 bg-[repeating-linear-gradient(-45deg,var(--brand-primary)_0_14px,var(--text-primary)_14px_28px)]" />
@@ -93,6 +100,33 @@ export default function Potvrda({ p, sajt, prijavljen }: { p: Porudzbina; sajt: 
                 </dl>
               </div>
             )}
+            {/* uplata na račun: predračun */}
+            {pr && (
+              <div className="mt-4 flex flex-col gap-4 rounded-[6px] border border-subtle bg-page p-5 sm:flex-row sm:items-center sm:justify-between md:px-7">
+                <div className="flex items-start gap-4">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-on-brand">
+                    <FileText className="size-5" strokeWidth={1.8} aria-hidden />
+                  </span>
+                  <div>
+                    <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-secondary">Predračun</p>
+                    <p className="mt-0.5 text-[20px] font-semibold tabular-nums">{pr.number}</p>
+                    <p className="mt-1 text-[14px] leading-[21px] text-secondary">
+                      Izdat {datum(pr.issueDate)}
+                      {pr.dueDate && <>, rok za uplatu {datum(pr.dueDate)}</>}. Isti predračun je u prilogu mejla.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-2.5">
+                  <a href={`/api/predracun/${p.id}`} target="_blank" rel="noopener" className="btn-secondary" style={{ height: 44, padding: "0 20px", fontSize: 14 }}>
+                    Otvori
+                  </a>
+                  <a href={`/api/predracun/${p.id}?preuzmi=1`} download={`predracun-${pr.number}.pdf`} className="btn-primary" style={{ height: 44, padding: "0 20px", fontSize: 14 }}>
+                    <Download className="size-4" strokeWidth={1.9} aria-hidden /> Preuzmi PDF
+                  </a>
+                </div>
+              </div>
+            )}
+
             {unapred && !qr && (
               <p className="mt-8 rounded-[6px] bg-page p-5 text-[15px] leading-[24px]">
                 Podatke za uplatu šaljemo na e-mail. Poziv na broj je <b className="font-semibold">{p.orderNumber}</b>, iznos <b className="font-semibold">{rsd(p.totalAmount)}</b>. Za pomoć pozovite{" "}

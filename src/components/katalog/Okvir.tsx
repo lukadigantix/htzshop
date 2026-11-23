@@ -6,10 +6,11 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { Banknote, Check, ChevronDown, Layers, LayoutGrid, Loader2, Palette, Percent, RotateCcw, Ruler, Search, ShieldCheck, SlidersHorizontal, Tag, Users, X, type LucideIcon } from "lucide-react";
 import { brojFiltera, filteriUUrl, ODELJCI_LISTE, POL_LABEL, PRAZNI, rsd, type Facete, type Filteri, type Opcija, type Sort } from "@/lib/filteri";
-import { nijansa } from "../proizvod/Varijante";
+import { bojaPozadina, svetlaBoja } from "@/lib/boje";
 import Cena from "./Cena";
 import Sortiranje from "./Sortiranje";
 import Razdvajac from "../Razdvajac";
+import { bezOptimizacije } from "@/lib/slike";
 
 /*
   Okvir liste sa filterima (po uzoru na KatalogOkvir sa klikdogume): levo panel (desktop), na telefonu dugme „Filteri" + fioka
@@ -71,7 +72,7 @@ export default function Okvir({ facete, aktivno, sakrij = [], ukupno, stavki, st
   }, []);
 
   const brojProizvoda = ukupno > 0 ? `${broj(ukupno)} ${proizvoda(ukupno)}` : "Nema proizvoda za ovaj izbor";
-  const panel = facete ? <Panel facete={facete} f={f} sakrij={sakrij} primeni={primeni} /> : <p className="rounded-[4px] bg-surface p-4 text-[13px] text-secondary">Filteri trenutno nisu dostupni.</p>;
+  const panel = facete ? <Panel facete={facete} f={f} sakrij={sakrij} primeni={primeni} /> : <p className="rounded-[8px] bg-surface p-4 text-[13px] text-secondary">Filteri trenutno nisu dostupni.</p>;
   const dugmeObrisi = (klase: string) =>
     n > 0 && (
       <button type="button" onClick={obrisiSve} className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-subtle px-3 text-[12.5px] font-medium transition hover:border-primary ${klase}`}>
@@ -91,7 +92,7 @@ export default function Okvir({ facete, aktivno, sakrij = [], ukupno, stavki, st
           </div>
           {dugmeObrisi("bg-surface")}
         </div>
-        {napomena && <p className="mb-3 rounded-[4px] bg-brand-soft px-4 py-3 text-[12.5px] leading-[18px] text-warning">{napomena}</p>}
+        {napomena && <p className="mb-3 rounded-[8px] bg-brand-soft px-4 py-3 text-[12.5px] leading-[18px] text-warning">{napomena}</p>}
         <div className="space-y-2">{panel}</div>
       </aside>
 
@@ -127,7 +128,7 @@ export default function Okvir({ facete, aktivno, sakrij = [], ukupno, stavki, st
                     </div>
                   </div>
                   <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-4 py-3">
-                    {napomena && <p className="rounded-[4px] bg-brand-soft px-4 py-3 text-[12.5px] leading-[18px] text-warning">{napomena}</p>}
+                    {napomena && <p className="rounded-[8px] bg-brand-soft px-4 py-3 text-[12.5px] leading-[18px] text-warning">{napomena}</p>}
                     {panel}
                   </div>
                   <div className="shrink-0 border-t border-subtle bg-surface px-5 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
@@ -170,7 +171,7 @@ export default function Okvir({ facete, aktivno, sakrij = [], ukupno, stavki, st
           {stavki > 0 ? (
             children
           ) : (
-            <div className="mt-5 rounded-[4px] bg-surface px-6 py-14 text-center">
+            <div className="mt-5 rounded-[8px] bg-surface px-6 py-14 text-center">
               <span className="mx-auto grid size-12 place-items-center rounded-full bg-page">
                 <Search className="size-5 text-secondary" strokeWidth={1.8} aria-hidden />
               </span>
@@ -202,7 +203,7 @@ function Cipovi({ f, facete, sakrij, primeni, obrisiSve }: { f: Filteri; facete:
   izLista("boja", (v) => v);
   izLista("pol", (v) => POL_LABEL[v] ?? v);
   izLista("standard", (v) => v);
-  izLista("materijal", (v) => v);
+  izLista("materijal", (v) => facete?.material.find((o) => o.value === v)?.label ?? v);
   if (f.akcija) stavke.push({ k: "akcija", label: "Na akciji", ukloni: () => ({ ...f, akcija: null }) });
   if (f.cenaOd != null || f.cenaDo != null) stavke.push({ k: "cena", label: opisCene(f.cenaOd, f.cenaDo), ukloni: () => ({ ...f, cenaOd: null, cenaDo: null }) });
   if (stavke.length === 0) return null;
@@ -264,11 +265,13 @@ function Panel({ facete, f, sakrij, primeni }: { facete: Facete; f: Filteri; sak
 
       {!sakrij.includes("grupa") && pokazi(grupe.length, f.grupa) && (
         <Sekcija ikona={LayoutGrid} naslov="Grupa" aktivno={f.grupa.length} sazetak={f.grupa.map((s) => grupe.find((g) => g.slug === s)?.name ?? s).join(", ")} onPonisti={ponisti({ grupa: [] })}>
-          {grupe.map((g) => (
-            <Red key={g.slug} checked={f.grupa.includes(g.slug)} onChange={() => menjaj("grupa", g.slug)} count={g.count}>
-              {g.name}
-            </Red>
-          ))}
+          <Skraceno ukupno={grupe.length} granica={8} natpis="sve grupe">
+            {(sve) => grupe.filter((g, i) => sve || i < 8 || f.grupa.includes(g.slug)).map((g) => (
+              <Red key={g.slug} checked={f.grupa.includes(g.slug)} onChange={() => menjaj("grupa", g.slug)} count={g.count}>
+                {g.name}
+              </Red>
+            ))}
+          </Skraceno>
         </Sekcija>
       )}
 
@@ -286,15 +289,25 @@ function Panel({ facete, f, sakrij, primeni }: { facete: Facete; f: Filteri; sak
         return (
           <Sekcija key={k} ikona={IKONA[k]} naslov={naslov} aktivno={f[k].length} sazetak={f[k].map(labela).join(", ")} onPonisti={ponisti({ [k]: [] })} otvoreno={k !== "standard" && k !== "materijal"}>
             {k === "velicina" ? (
-              <Plocice opcije={opc} izabrano={f.velicina} onToggle={(v) => menjaj("velicina", v)} />
+              <Plocice
+                opcije={opc}
+                izabrano={f.velicina}
+                onToggle={(vrednosti) => {
+                  // pločica može da nosi više vrednosti (XXL i 2XL): izabrana bilo koja → skidaju se sve, inače se dodaju sve
+                  const ima = vrednosti.some((v) => f.velicina.includes(v));
+                  primeni({ ...f, velicina: ima ? f.velicina.filter((v) => !vrednosti.includes(v)) : [...new Set([...f.velicina, ...vrednosti])] });
+                }}
+              />
             ) : k === "boja" ? (
               <Boje opcije={opc} izabrano={f.boja} onToggle={(v) => menjaj("boja", v)} />
             ) : (
-              opc.map((o) => (
-                <Red key={o.value} checked={f[k].includes(o.value)} onChange={() => menjaj(k, o.value)} count={o.count}>
-                  {labela(o.value)}
-                </Red>
-              ))
+              <Skraceno ukupno={opc.length} granica={8} natpis={SVE[k]}>
+                {(sve) => opc.filter((o, i) => sve || i < 8 || f[k].includes(o.value)).map((o) => (
+                  <Red key={o.value} checked={f[k].includes(o.value)} onChange={() => menjaj(k, o.value)} count={o.count}>
+                    {labela(o.value)}
+                  </Red>
+                ))}
+              </Skraceno>
             )}
           </Sekcija>
         );
@@ -318,10 +331,10 @@ function Sekcija({ ikona: I, naslov, otvoreno = true, aktivno = 0, sazetak, onPo
   const [open, setOpen] = useState(otvoreno || aktivno > 0);
   const id = useId();
   return (
-    <section className="rounded-[4px] bg-surface">
+    <section className="rounded-[12px] bg-surface">
       <div className="flex items-center gap-0.5 pr-2.5">
         <button type="button" aria-expanded={open} aria-controls={id} onClick={() => setOpen(!open)} className="flex min-w-0 flex-1 items-center gap-3 py-3 pl-3.5 text-left">
-          <span className={`grid size-9 shrink-0 place-items-center rounded-[4px] transition-colors ${aktivno > 0 ? "bg-brand text-on-brand" : "bg-page text-primary"}`}>
+          <span className={`grid size-9 shrink-0 place-items-center rounded-[8px] transition-colors ${aktivno > 0 ? "bg-brand text-on-brand" : "bg-page text-primary"}`}>
             <I className="size-4" strokeWidth={1.8} aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
@@ -353,9 +366,9 @@ function Sekcija({ ikona: I, naslov, otvoreno = true, aktivno = 0, sazetak, onPo
 
 function Red({ checked, onChange, count, ikona, children }: { checked: boolean; onChange: () => void; count: number; ikona?: ReactNode; children: ReactNode }) {
   return (
-    <label className={`group -mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-[4px] px-1.5 py-2 text-[14px] transition-colors hover:bg-page ${checked ? "font-medium" : ""}`}>
+    <label className={`group -mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-[8px] px-1.5 py-2 text-[14px] transition-colors hover:bg-page ${checked ? "font-medium" : ""}`}>
       <input type="checkbox" checked={checked} onChange={onChange} className="peer sr-only" />
-      <span aria-hidden className={`grid size-5 shrink-0 place-items-center rounded-[4px] border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-brand ${checked ? "border-primary bg-primary" : "border-[#c4c7cc] bg-surface group-hover:border-input"}`}>
+      <span aria-hidden className={`grid size-5 shrink-0 place-items-center rounded-[8px] border transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-brand ${checked ? "border-primary bg-primary" : "border-[#c4c7cc] bg-surface group-hover:border-input"}`}>
         {checked && <Check className="size-3.5 text-white" strokeWidth={3} />}
       </span>
       {ikona}
@@ -365,41 +378,146 @@ function Red({ checked, onChange, count, ikona, children }: { checked: boolean; 
   );
 }
 
-/** veličine kao pločice (S, M, L… ili 38, 39…) - više izbora odjednom */
-function Plocice({ opcije, izabrano, onToggle }: { opcije: Opcija[]; izabrano: string[]; onToggle: (v: string) => void }) {
-  return (
-    <div className="grid grid-cols-4 gap-1.5">
-      {opcije.map((o) => {
-        const on = izabrano.includes(o.value);
+/* veličine u tri grupe: slovne (XS…5XL, redom; XXL i 2XL su jedna pločica), brojevi (36…64, redom) i kombinovane
+   (S-M, 36/39, UNI…: retke, sklopljene dok se ne otvore ili dok neka nije izabrana) */
+const SLOVNE = ["XXS", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL", "6XL", "7XL"];
+const slovna = (v: string) => {
+  const x = v.toUpperCase().replace(/\s+/g, "");
+  const m = x.match(/^(X{2,6})L$/);
+  return m ? `${m[1].length}XL` : x;
+};
+type Plocica = { kljuc: string; label: string; vrednosti: string[]; count: number };
+
+function grupisiVelicine(opcije: Opcija[]) {
+  const slova = new Map<string, Plocica>();
+  const brojevi: Plocica[] = [];
+  const ostalo: Plocica[] = [];
+  for (const o of opcije) {
+    const s = slovna(o.label);
+    if (SLOVNE.includes(s)) {
+      const p = slova.get(s) ?? { kljuc: s, label: s, vrednosti: [], count: 0 };
+      p.vrednosti.push(o.value);
+      p.count += o.count;
+      slova.set(s, p);
+    } else if (/^\d+([.,]5)?$/.test(o.label.trim())) {
+      brojevi.push({ kljuc: o.value, label: o.label.trim(), vrednosti: [o.value], count: o.count });
+    } else {
+      ostalo.push({ kljuc: o.value, label: o.label, vrednosti: [o.value], count: o.count });
+    }
+  }
+  return {
+    slova: SLOVNE.map((s) => slova.get(s)).filter((p): p is Plocica => !!p),
+    brojevi: brojevi.sort((a, b) => parseFloat(a.label.replace(",", ".")) - parseFloat(b.label.replace(",", "."))),
+    ostalo: ostalo.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "sr")),
+  };
+}
+
+function Plocice({ opcije, izabrano, onToggle }: { opcije: Opcija[]; izabrano: string[]; onToggle: (vrednosti: string[]) => void }) {
+  const { slova, brojevi, ostalo } = grupisiVelicine(opcije);
+  const izabranoOstalo = ostalo.some((p) => p.vrednosti.some((v) => izabrano.includes(v)));
+  const [otvorenoOstalo, setOtvorenoOstalo] = useState(false);
+  const grupe = [slova.length > 0, brojevi.length > 0, ostalo.length > 0].filter(Boolean).length;
+
+  const mreza = (lista: Plocica[], kolona: 4 | 5) => (
+    <div className={`grid gap-1.5 ${kolona === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
+      {lista.map((p) => {
+        const on = p.vrednosti.some((v) => izabrano.includes(v));
         return (
-          <button key={o.value} type="button" aria-pressed={on} disabled={o.count === 0 && !on} onClick={() => onToggle(o.value)} title={`${o.label}: ${broj(o.count)}`} className={`flex h-12 flex-col items-center justify-center rounded-[4px] border transition-colors disabled:opacity-35 ${on ? "border-primary bg-primary text-white" : "border-subtle bg-surface hover:border-primary"}`}>
-            <span className="text-[14px] font-medium leading-none">{o.label}</span>
-            <span className={`mt-1 text-[10px] leading-none tabular-nums ${on ? "text-white/60" : "text-secondary"}`}>{broj(o.count)}</span>
+          <button
+            key={p.kljuc}
+            type="button"
+            aria-pressed={on}
+            disabled={p.count === 0 && !on}
+            onClick={() => onToggle(p.vrednosti)}
+            title={`${p.label}: ${broj(p.count)}`}
+            className={`flex flex-col items-center justify-center rounded-[8px] border transition-colors disabled:opacity-35 ${kolona === 5 ? "h-11" : "h-12"} ${on ? "border-primary bg-primary text-white" : "border-subtle bg-surface hover:border-primary"}`}
+          >
+            <span className={`max-w-full truncate px-1 font-medium leading-none ${kolona === 5 ? "text-[13px]" : "text-[14px]"}`}>{p.label}</span>
+            <span className={`mt-1 text-[10px] leading-none tabular-nums ${on ? "text-white/60" : "text-secondary"}`}>{broj(p.count)}</span>
           </button>
         );
       })}
+    </div>
+  );
+  const naslov = (t: string) => grupe > 1 && <p className="mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-secondary first:mt-0">{t}</p>;
+
+  return (
+    <div>
+      {slova.length > 0 && (
+        <>
+          {naslov("Slovne")}
+          {mreza(slova, 4)}
+        </>
+      )}
+      {brojevi.length > 0 && (
+        <>
+          {naslov("Brojevi")}
+          {mreza(brojevi, 5)}
+        </>
+      )}
+      {ostalo.length > 0 &&
+        (grupe === 1 || otvorenoOstalo || izabranoOstalo ? (
+          <>
+            {naslov("Kombinovane")}
+            {mreza(ostalo, 4)}
+          </>
+        ) : (
+          <button type="button" onClick={() => setOtvorenoOstalo(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-1.5 rounded-[8px] bg-page text-[13px] font-medium transition hover:bg-subtle">
+            Kombinovane i univerzalne ({ostalo.length})
+            <ChevronDown className="size-3.5" strokeWidth={2} aria-hidden />
+          </button>
+        ))}
     </div>
   );
 }
 
 /** boje kao kružići sa nazivom; boja bez poznate nijanse dobija šrafuru */
 function Boje({ opcije, izabrano, onToggle }: { opcije: Opcija[]; izabrano: string[]; onToggle: (v: string) => void }) {
+  // najzastupljenije boje prve (crna, plava, crvena…), retke nijanse iza „Prikaži još"
+  const poBroju = [...opcije].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "sr"));
   return (
+    <Skraceno ukupno={opcije.length} granica={BOJA} natpis="sve boje">
+      {(sve) => (
     <div className="grid grid-cols-2 gap-1.5">
-      {opcije.map((o) => {
+      {poBroju.filter((o, i) => sve || i < BOJA || izabrano.includes(o.value)).map((o) => {
         const on = izabrano.includes(o.value);
-        const hex = nijansa(o.label);
+
         return (
-          <button key={o.value} type="button" aria-pressed={on} onClick={() => onToggle(o.value)} className={`flex items-center gap-2 rounded-[4px] border px-2 py-1.5 text-left text-[13px] transition-colors ${on ? "border-primary bg-page font-medium" : "border-subtle bg-surface hover:border-input"}`}>
-            <span className={`grid size-6 shrink-0 place-items-center rounded-full border border-black/10 ${on ? "ring-2 ring-primary ring-offset-1" : ""}`} style={{ background: hex ?? "repeating-linear-gradient(45deg,#e2e4e8 0 3px,#fff 3px 6px)" }}>
-              {on && <Check className={`size-3.5 ${hex && ["#ffffff", "#f5c518", "#d8c3a5"].includes(hex) ? "text-primary" : "text-white"}`} strokeWidth={3} aria-hidden />}
+          <button key={o.value} type="button" aria-pressed={on} onClick={() => onToggle(o.value)} className={`flex items-center gap-2 rounded-[8px] border px-2 py-1.5 text-left text-[13px] transition-colors ${on ? "border-primary bg-page font-medium" : "border-subtle bg-surface hover:border-input"}`}>
+            <span className={`grid size-6 shrink-0 place-items-center rounded-full border border-black/10 ${on ? "ring-2 ring-primary ring-offset-1" : ""}`} style={{ background: bojaPozadina(o.label) }}>
+              {on && <Check className={`size-3.5 ${svetlaBoja(o.label) ? "text-primary" : "text-white"}`} strokeWidth={3} aria-hidden />}
             </span>
-            <span className="min-w-0 flex-1 truncate">{o.label}</span>
+            <span className="min-w-0 flex-1 truncate" title={o.label}>{o.label}</span>
             <span className="text-[11px] tabular-nums text-secondary">{broj(o.count)}</span>
           </button>
         );
       })}
     </div>
+      )}
+    </Skraceno>
+  );
+}
+
+/* ---------- skraćene liste ---------- */
+
+const BOJA = 10;
+
+const SVE: Record<(typeof ODELJCI_LISTE)[number]["k"], string> = { velicina: "sve veličine", boja: "sve boje", pol: "sve", standard: "sve standarde", materijal: "sve materijale" };
+
+/** dugačke liste filtera (boje, veličine, grupe, standardi…): prvih `granica` + izabrane, ostalo na „Prikaži sve" */
+function Skraceno({ ukupno, granica, natpis, children }: { ukupno: number; granica: number; natpis: string; children: (sve: boolean) => ReactNode }) {
+  const [sve, setSve] = useState(false);
+  const skriveno = ukupno - granica;
+  // jedna-dve skrivene stavke nisu vredne dugmeta
+  if (skriveno <= 2) return <>{children(true)}</>;
+  return (
+    <>
+      {children(sve)}
+      <button type="button" onClick={() => setSve(!sve)} aria-expanded={sve} className="mt-1.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-[8px] bg-page text-[13px] font-medium transition hover:bg-subtle">
+        {sve ? "Prikaži manje" : `Prikaži ${natpis} (${ukupno})`}
+        <ChevronDown className={`size-3.5 transition-transform ${sve ? "rotate-180" : ""}`} strokeWidth={2} aria-hidden />
+      </button>
+    </>
   );
 }
 
@@ -418,7 +536,7 @@ function Brendovi({ brendovi, izabrano, onToggle }: { brendovi: Facete["brands"]
         <label className="relative mb-1.5 block">
           <span className="sr-only">Traži brend</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-secondary" strokeWidth={1.8} aria-hidden />
-          <input type="search" value={upit} onChange={(e) => setUpit(e.target.value)} placeholder="Traži brend" autoComplete="off" className="polje h-10 w-full rounded-[4px] border border-subtle bg-page pl-9 pr-3 text-[16px] outline-none transition placeholder:text-[#9a9ea5] focus:border-primary focus:bg-surface sm:text-[14px]" />
+          <input type="search" value={upit} onChange={(e) => setUpit(e.target.value)} placeholder="Traži brend" autoComplete="off" className="polje h-10 w-full rounded-[8px] border border-subtle bg-page pl-9 pr-3 text-[16px] outline-none transition placeholder:text-[#9a9ea5] focus:border-primary focus:bg-surface sm:text-[14px]" />
         </label>
       )}
       {prikaz.map((b) => (
@@ -428,10 +546,10 @@ function Brendovi({ brendovi, izabrano, onToggle }: { brendovi: Facete["brands"]
           onChange={() => onToggle(b.slug)}
           count={b.count}
           ikona={
-            <span className="grid h-6 w-11 shrink-0 place-items-center overflow-hidden rounded-[3px] border border-subtle bg-surface">
+            <span className="grid h-6 w-11 shrink-0 place-items-center overflow-hidden rounded-[5px] border border-subtle bg-surface">
               {b.logo ? (
                 <span className="relative block h-4 w-9">
-                  <Image src={b.logo} alt="" fill sizes="36px" unoptimized={/^https?:/.test(b.logo)} className="object-contain" />
+                  <Image src={b.logo} alt="" fill sizes="36px" unoptimized={bezOptimizacije(b.logo)} className="object-contain" />
                 </span>
               ) : <span className="text-[10px] font-semibold uppercase text-secondary">{b.name.slice(0, 2)}</span>}
             </span>
@@ -442,7 +560,7 @@ function Brendovi({ brendovi, izabrano, onToggle }: { brendovi: Facete["brands"]
       ))}
       {prikaz.length === 0 && <p className="py-2 text-[13px] text-secondary">Nema brenda „{upit.trim()}“ u ponudi.</p>}
       {!q && (skriveno > 0 || sve) && (
-        <button type="button" onClick={() => setSve(!sve)} className="mt-1.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-[4px] bg-page text-[13px] font-medium transition hover:bg-subtle">
+        <button type="button" onClick={() => setSve(!sve)} className="mt-1.5 flex h-9 w-full items-center justify-center gap-1.5 rounded-[8px] bg-page text-[13px] font-medium transition hover:bg-subtle">
           {sve ? "Prikaži manje" : `Prikaži sve brendove (${brendovi.length})`}
           <ChevronDown className={`size-3.5 transition-transform ${sve ? "rotate-180" : ""}`} strokeWidth={2} aria-hidden />
         </button>

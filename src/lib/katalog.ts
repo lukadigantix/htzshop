@@ -1,4 +1,5 @@
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
+import { KATALOG, KES_KATALOGA } from "./kes";
 import { API_URL, fileUrl } from "./api";
 import { brands as lokalniBrendovi, categories, productTabs } from "@/data/site";
 import { type Facete, type Filteri, type Sort } from "./filteri";
@@ -27,6 +28,8 @@ export type Kartica = {
   deliveryTime: string | null;
   shipping: { free: boolean; label: string | null } | null;
   badges: string[];
+  /** boja i veličina za karticu: „Neon žuta · Univerzalna veličina", „12 boja · S–3XL" */
+  osobine?: string | null;
 };
 export type Meta = { page: number; limit: number; total: number; totalPages: number };
 export type Katalog = { items: Kartica[]; meta: Meta; facete: Facete | null; lokalno: boolean };
@@ -37,13 +40,16 @@ type ApiStavka = {
   slug: string;
   name: string;
   image: string | null;
-  brand: { name: string; logoUrl?: string | null } | null;
+  brand: { name: string; slug?: string; logoUrl?: string | null } | null;
   groups?: { name: string }[];
   priceDisplay: { price: number | null; basePrice: number | null; label: string } | null;
   inStock: boolean;
   deliveryTime: string | null;
   shipping: { free: boolean; label: string | null } | null;
   badges?: { name: string }[];
+  color?: string | null;
+  size?: string | null;
+  variantSummary?: { count: number; sizes: string[]; colors: string[] } | null;
 };
 type ApiFacete = {
   total: number;
@@ -60,7 +66,8 @@ type ApiFacete = {
 
 async function api<T>(path: string): Promise<{ data: T; meta?: Meta } | null> {
   "use cache";
-  cacheLife("minutes");
+  cacheLife(KES_KATALOGA);
+  cacheTag(KATALOG);
   const r = await fetch(`${API_URL}${path}`, { signal: AbortSignal.timeout(8_000) });
   if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
   return (await r.json()) as { data: T; meta?: Meta };
@@ -91,17 +98,19 @@ function upit(f: Filteri, m: Awaited<ReturnType<typeof mape>>) {
 
 const opcije = (o: ApiFacete["size"] | undefined) => (o ?? []).map((x) => ({ value: String(x.value), label: String(x.label ?? x.value), count: Number(x.count) || 0 }));
 
-export async function getKatalog(f: Filteri, sort: Sort, strana: number): Promise<Katalog> {
+/** `trazi`: tekst pretrage (strana /pretraga/); sužava i artikle i filtere */
+export async function getKatalog(f: Filteri, sort: Sort, strana: number, trazi?: string): Promise<Katalog> {
   const m = await mape();
   const sp = upit(f, m);
+  if (trazi) sp.set("search", trazi);
   const lista = new URLSearchParams(sp);
   lista.set("page", String(strana));
   lista.set("limit", String(PO_STRANI));
   if (sort !== "recommended") lista.set("sort", sort);
   const [proizvodi, fasete] = await Promise.all([probaj<ApiStavka[]>(`/products?${lista}`), probaj<ApiFacete>(`/filters?${sp}`)]);
 
-  // backend ne radi ili je katalog prazan → artikli sa naslovne
-  if (!proizvodi || !fasete || (await praznaBaza(fasete.data.total))) return lokalniKatalog(f, sort, strana);
+  // backend ne radi ili je katalog prazan → artikli sa naslovne (pretraga bez pogodaka nije prazan katalog)
+  if (!proizvodi || !fasete || (!trazi && (await praznaBaza(fasete.data.total)))) return lokalniKatalog(f, sort, strana);
 
   const d = fasete.data;
   return {
@@ -123,11 +132,29 @@ export async function getKatalog(f: Filteri, sort: Sort, strana: number): Promis
   };
 }
 
+const veliko = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+const UNIVERZALNA = /^(uni|univerzaln\w*|one ?size|os|std|standard)$/i;
+
+/** „Neon žuta · Univerzalna veličina", „Crna · L", „12 boja · S–3XL", „Veličine 36–48" */
+export function osobineModela(p: Pick<ApiStavka, "color" | "size" | "variantSummary">): string | null {
+  const boje = p.variantSummary?.colors?.length ? p.variantSummary.colors : p.color ? [p.color] : [];
+  const velicine = p.variantSummary?.sizes?.length ? p.variantSummary.sizes : p.size ? [p.size] : [];
+  const boja = boje.length > 1 ? `${boje.length} ${boje.length % 10 >= 2 && boje.length % 10 <= 4 && (boje.length % 100 < 12 || boje.length % 100 > 14) ? "boje" : "boja"}` : boje[0] ? veliko(boje[0].trim()) : null;
+  const vel =
+    velicine.length > 1
+      ? `${velicine.length > 2 ? "Veličine " : ""}${velicine[0]}–${velicine[velicine.length - 1]}`
+      : velicine[0]
+        ? UNIVERZALNA.test(velicine[0].trim()) ? "Univerzalna veličina" : `Veličina ${velicine[0]}`
+        : null;
+  return [boja, vel].filter(Boolean).join(" · ") || null;
+}
+
 const uKarticu = (p: ApiStavka): Kartica => ({
   slug: p.slug,
   name: p.name,
   brand: p.brand?.name ?? null,
-  brandLogo: p.brand?.logoUrl ? fileUrl(p.brand.logoUrl) : null,
+  // logo iz admina (Brendovi), inače logo iz prodavnice (data/site.ts), inače kartica ispisuje naziv brenda
+  brandLogo: p.brand?.logoUrl ? fileUrl(p.brand.logoUrl) : (lokalniBrendovi.find((b) => b.slug === p.brand?.slug || b.name.toLowerCase() === p.brand?.name.toLowerCase())?.logo ?? null),
   group: p.groups?.[0]?.name ?? "",
   price: p.priceDisplay?.price ?? 0,
   basePrice: p.priceDisplay?.basePrice ?? null,
@@ -137,6 +164,7 @@ const uKarticu = (p: ApiStavka): Kartica => ({
   deliveryTime: p.deliveryTime,
   shipping: p.shipping,
   badges: (p.badges ?? []).map((b) => b.name),
+  osobine: osobineModela(p),
 });
 
 /* ---------- izdvojeno na naslovnoj ---------- */
@@ -265,5 +293,26 @@ function lokalniKatalog(f: Filteri, sort: Sort, strana: number): Katalog {
       gender: [],
       onPromotion: 0,
     },
+  };
+}
+
+export type GrupaIzBaze = { slug: string; name: string; parent: { slug: string; name: string } | null; subs: string[] };
+
+/**
+ * Grupa (ili podgrupa) iz admina po slug-u, za stranu /kategorija-proizvoda/<slug> kada slug nije među odeljcima iz
+ * data/site.ts (npr. „Zaštitne naočare" u odeljku „Zaštita očiju i lica"). null = nema je ili je isključena.
+ */
+export async function getGrupa(slug: string): Promise<GrupaIzBaze | null> {
+  type G = { id: string; slug: string; name: string; isActive: boolean; parentId: string | null; mergedIntoId?: string | null };
+  const r = await probaj<G[]>("/categories");
+  const sve = r?.data ?? [];
+  const g = sve.find((x) => x.slug === slug && x.isActive && !x.mergedIntoId);
+  if (!g) return null;
+  const roditelj = g.parentId ? sve.find((x) => x.id === g.parentId) : undefined;
+  return {
+    slug: g.slug,
+    name: g.name,
+    parent: roditelj ? { slug: roditelj.slug, name: roditelj.name } : null,
+    subs: sve.filter((x) => x.parentId === g.id && x.isActive).map((x) => x.name),
   };
 }

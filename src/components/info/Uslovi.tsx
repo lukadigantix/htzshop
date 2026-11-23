@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { contact } from "@/data/site";
 import type { Sajt } from "@/lib/sajt";
 import { STIT } from "../logoPutanje";
 import Razdvajac from "../Razdvajac";
@@ -36,7 +35,7 @@ export function UvodUslova({ naziv, naslov, opis, children }: { naziv: string; n
 
         <div className="hero-in mt-10 max-w-[900px] md:mt-14">
           <p className="text-[12px] uppercase tracking-[0.18em] text-white/55">{naziv}</p>
-          <h1 className="mt-5 text-[42px] font-medium leading-[1.03] tracking-[-0.03em] md:text-[64px] xl:text-[80px]">{naslov}</h1>
+          <h1 className="mt-5 text-[34px] font-medium leading-[1.08] tracking-[-0.03em] md:text-[48px] xl:text-[56px]">{naslov}</h1>
           <p className="mt-6 max-w-[620px] text-[16px] leading-[27px] text-white/70 md:text-[17px] md:leading-[28px]">{opis}</p>
         </div>
         {children}
@@ -140,7 +139,7 @@ export function Pitanja({ pitanja }: { pitanja: Pitanje[] }) {
   return (
     <div className="border-t border-subtle">
       {pitanja.map((p) => (
-        <details key={p.q} className="group border-b border-subtle">
+        <details key={p.q} name="cesta-pitanja" className="group border-b border-subtle">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-[17px] font-medium leading-snug md:py-6 md:text-[18px] [&::-webkit-details-marker]:hidden">
             {p.q}
             <span className="relative grid size-9 shrink-0 place-items-center rounded-full border border-subtle transition group-open:border-brand group-open:bg-brand">
@@ -188,7 +187,7 @@ export function PdfZaglavlje({ naslov, s, doneto, naSnazi, putanja }: { naslov: 
       <div className="mb-[6mm] mt-[5mm] h-[2.2mm] bg-[repeating-linear-gradient(-45deg,#f5c518_0_3mm,#202124_3mm_6mm)]" />
       <h1 className="text-[17pt] font-semibold leading-tight">{naslov}</h1>
       <p className="mt-2 text-[9.5pt] text-[#5f6368]">
-        {contact.legalName}, {s.street}, {s.city} | PIB: {s.pib} | Matični broj: {s.mb}
+        {s.legalName}, {s.street}, {s.city} | PIB: {s.pib} | Matični broj: {s.mb}
         <br />
         Doneto {doneto} Na snazi od {naSnazi} Objavljeno na htzshop.rs{putanja}
       </p>

@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "../Icons";
 
-/** Strane kao linkovi (rade bez JS-a, Google ih prati); `?strana=` se dodaje na postojeći upit, prva strana je bez parametra. */
+/**
+ * Strane kao linkovi (rade bez JS-a, Google ih prati); `?strana=` se dodaje na postojeći upit, prva strana je bez parametra.
+ * Sledeća strana (strelica i njen broj) se učitava unapred cela, sa artiklima, pa je prelazak na nju trenutan; ostale
+ * strane samo okvir (podrazumevano), da se ne opterećuje server.
+ */
 export default function Paginacija({ strana, ukupno, upit }: { strana: number; ukupno: number; upit: URLSearchParams }) {
   if (ukupno <= 1) return null;
   const href = (n: number) => {
@@ -21,7 +25,7 @@ export default function Paginacija({ strana, ukupno, upit }: { strana: number; u
   const dugme = "grid size-10 place-items-center rounded-full text-[14px] font-medium transition-colors";
   const strelica = (n: number, label: string, ikona: React.ReactNode) =>
     n >= 1 && n <= ukupno && n !== strana ? (
-      <Link href={href(n)} aria-label={label} className={`${dugme} border border-subtle bg-surface hover:border-primary hover:bg-primary hover:text-white`}>
+      <Link href={href(n)} prefetch={n === strana + 1 ? true : undefined} aria-label={label} className={`${dugme} border border-subtle bg-surface hover:border-primary hover:bg-primary hover:text-white`}>
         {ikona}
       </Link>
     ) : (
@@ -43,7 +47,7 @@ export default function Paginacija({ strana, ukupno, upit }: { strana: number; u
             {s}
           </span>
         ) : (
-          <Link key={s} href={href(s)} className={`${dugme} border border-subtle bg-surface hover:border-primary`}>
+          <Link key={s} href={href(s)} prefetch={s === strana + 1 ? true : undefined} className={`${dugme} border border-subtle bg-surface hover:border-primary`}>
             {s}
           </Link>
         ),

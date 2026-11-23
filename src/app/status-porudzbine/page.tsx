@@ -136,8 +136,9 @@ export default async function StatusPorudzbinePage({ searchParams }: Props) {
             </p>
           </section>
 
-          <div className="space-y-3">
-            <section aria-labelledby="broj" className={KARTICA}>
+          {/* desna kolona prati visinu leve kartice: tekstualne kartice dele višak visine, telefon ostaje svoje visine */}
+          <div className="flex flex-col gap-3">
+            <section aria-labelledby="broj" className={`${KARTICA} lg:flex lg:flex-1 lg:flex-col lg:justify-center`}>
               <h2 id="broj" className="flex items-center gap-2.5 text-[17px] font-medium">
                 <Mail className="size-5 text-brand-active" strokeWidth={1.7} /> Gde je broj porudžbine?
               </h2>
@@ -146,7 +147,7 @@ export default async function StatusPorudzbinePage({ searchParams }: Props) {
                 upisanim brojem.
               </p>
             </section>
-            <section aria-labelledby="zastita" className={KARTICA}>
+            <section aria-labelledby="zastita" className={`${KARTICA} lg:flex lg:flex-1 lg:flex-col lg:justify-center`}>
               <h2 id="zastita" className="flex items-center gap-2.5 text-[17px] font-medium">
                 <ShieldCheck className="size-5 text-brand-active" strokeWidth={1.7} /> Zašto i e-mail?
               </h2>

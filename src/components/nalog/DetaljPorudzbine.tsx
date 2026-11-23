@@ -167,6 +167,13 @@ export default function DetaljPorudzbine({ p, posiljke, radnja, gost = false }: 
                 Poziv na broj <b className="font-semibold">{p.orderNumber}</b>, iznos <b className="font-semibold">{rsd(p.totalAmount)}</b>. Podaci za uplatu i IPS QR kod su u mejlu potvrde. Šaljemo čim uplata stigne.
               </p>
             )}
+            {p.proforma && (
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[14px]">
+                <span className="text-secondary">Predračun <b className="font-semibold text-primary tabular-nums">{p.proforma.number}</b></span>
+                <a href={`/api/predracun/${p.id}`} target="_blank" rel="noopener" className="font-medium underline underline-offset-2">Otvori</a>
+                <a href={`/api/predracun/${p.id}?preuzmi=1`} download={`predracun-${p.proforma.number}.pdf`} className="font-medium underline underline-offset-2">Preuzmi PDF</a>
+              </div>
+            )}
           </div>
           {p.notes && (
             <div className={KARTICA}>

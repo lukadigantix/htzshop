@@ -1,31 +1,14 @@
 import Link from "next/link";
 import type { Varijanta } from "@/lib/proizvod";
+import { bojaPozadina } from "@/lib/boje";
 
 /*
   Birač boje i veličine. Svaka varijanta je poseban artikal sa svojim slug-om, pa su izbori linkovi
   (bez JS-a, rade i sa „nazad" u browseru). Veličine se prikazuju za trenutno izabranu boju.
 */
 
-// Nazivi boja iz admina → nijansa za kružić; nepoznata boja ide kao tekstualna pilula
-const BOJE: Record<string, string> = {
-  crna: "#1a1a1a",
-  bela: "#ffffff",
-  siva: "#8a8d91",
-  "tamno siva": "#4a4d52",
-  plava: "#1f4e9c",
-  teget: "#1c2a48",
-  "svetlo plava": "#6fa3d8",
-  zelena: "#2f7d32",
-  "tamno zelena": "#1f4a2a",
-  maslinasta: "#6b6b3a",
-  crvena: "#b42318",
-  bordo: "#6d1a24",
-  narandžasta: "#f26b1d",
-  žuta: "#f5c518",
-  braon: "#6b4a2b",
-  bež: "#d8c3a5",
-};
-export const nijansa = (boja: string): string | undefined => BOJE[boja.trim().toLowerCase()];
+// Naziv boje → pozadina kružića (lib/boje.ts); svaka boja je kružić, i neobičan naziv
+export const nijansa = (boja: string): string => bojaPozadina(boja);
 
 const RED = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "2XL", "XXXL", "3XL", "4XL", "5XL"];
 const poredak = (s: string) => {
@@ -57,9 +40,8 @@ export default function Varijante({ varijante, size, color }: { varijante: Varij
           </p>
           <div className="mt-3 flex flex-wrap gap-2.5">
             {boje.map((c) => {
-              const hex = nijansa(c);
               const izabrana = c === color;
-              return hex ? (
+              return (
                 <Link
                   key={c}
                   href={`/proizvod/${zaBoju(c)}/`}
@@ -69,17 +51,7 @@ export default function Varijante({ varijante, size, color }: { varijante: Varij
                   aria-current={izabrana}
                   className={`grid size-10 place-items-center rounded-full ring-1 ring-offset-2 transition ${izabrana ? "ring-primary" : "ring-transparent hover:ring-subtle"}`}
                 >
-                  <span className="size-8 rounded-full border border-black/10" style={{ background: hex }} />
-                </Link>
-              ) : (
-                <Link
-                  key={c}
-                  href={`/proizvod/${zaBoju(c)}/`}
-                  scroll={false}
-                  aria-current={izabrana}
-                  className={`inline-flex h-10 items-center rounded-full border px-4 text-[14px] transition ${izabrana ? "border-primary bg-primary text-white" : "border-subtle bg-surface hover:border-primary"}`}
-                >
-                  {c}
+                  <span className="size-8 rounded-full border border-black/10" style={{ background: nijansa(c) }} />
                 </Link>
               );
             })}

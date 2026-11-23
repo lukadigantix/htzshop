@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { companySteps, contact } from "@/data/site";
+import { companySteps } from "@/data/site";
+import { getSajt } from "@/lib/sajt";
 import Razdvajac from "./Razdvajac";
 
 // Sekcija 8 (Pitbike „Rennsaison 2026."): naslov + tekst levo, lista redova sa oznakom desno.
-export default function ForCompanies() {
+export default async function ForCompanies() {
+  const s = await getSajt();
   return (
     <section className="container-site grid grid-cols-1 gap-10 pb-16 md:pb-24 lg:grid-cols-2 lg:gap-16">
       <div>
@@ -29,8 +31,8 @@ export default function ForCompanies() {
           ))}
           <li className="flex items-center justify-between border-b border-subtle py-6">
             <div>
-              <p className="text-[16px] font-medium">Direktno: {contact.email}</p>
-              <p className="mt-1 text-[13px] text-secondary">{contact.phone}
+              <p className="text-[16px] font-medium">Direktno: {s.email}</p>
+              <p className="mt-1 text-[13px] text-secondary">{s.phone}
                 <Razdvajac />
                 pon-pet 07-15h</p>
             </div>

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
+import "./fontovi-slajda.css";
 import Preloader from "@/components/Preloader";
 import TopBar from "@/components/TopBar";
-import Header from "@/components/Header";
+import HeaderPodaci from "@/components/HeaderPodaci";
 import Footer from "@/components/Footer";
 import Dodato from "@/components/korpa/Dodato";
 
@@ -29,12 +31,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="contents print:hidden">
           <Preloader />
           <TopBar />
-          <Header />
+          <HeaderPodaci />
         </div>
         <div className="flex flex-1 flex-col">{children}</div>
         <div className="contents print:hidden">
           <Footer />
-          <Dodato />
+          {/* koristi usePathname; bez Suspense-a Next 16.4.6+ ne može da prerenderuje dinamičke rute */}
+          <Suspense fallback={null}>
+            <Dodato />
+          </Suspense>
         </div>
       </body>
     </html>

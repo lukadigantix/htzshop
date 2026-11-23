@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { aboutStats, contact, mapsHref } from "@/data/site";
+import { getSajt, okruglo, type Sajt } from "@/lib/sajt";
 import { Clock, Pin } from "./Icons";
 import Razdvajac from "./Razdvajac";
 
@@ -8,7 +8,16 @@ import Razdvajac from "./Razdvajac";
   O nama / prodavnica: bela kartica levo (naslov, tekst, četiri brojke, adresa, dugmad),
   fotografija prodavnice desno sa plutajućom oznakom radnog vremena. Ogledalo sekcije Brendiranje.
 */
-export default function About() {
+// Brojke iz admina: godina (Podešavanja → Firma), artikli i brendovi koje prodavnica prikazuje (uživo), kupci (Firma)
+const brojke = (s: Sajt) => [
+  { value: `${s.founded}.`, label: "godina osnivanja" },
+  ...(s.productCount ? [{ value: okruglo(s.productCount), label: "artikala u ponudi" }] : []),
+  ...(s.brandCount ? [{ value: String(s.brandCount), label: "brendova u ponudi" }] : []),
+  ...(s.customersRetail ? [{ value: `${okruglo(s.customersRetail)}`, label: "zadovoljnih kupaca" }] : []),
+];
+
+export default async function About() {
+  const sajt = await getSajt();
   return (
     <section id="o-nama" className="container-site pb-16 md:pb-24">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_1fr] lg:gap-8">
@@ -21,7 +30,7 @@ export default function About() {
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-6 border-y border-subtle py-6 md:mt-10 md:grid-cols-4 md:py-8">
-            {aboutStats.map((s) => (
+            {brojke(sajt).map((s) => (
               <div key={s.label}>
                 <dt className="text-[28px] font-medium leading-none tracking-[-0.01em] md:text-[32px]">{s.value}</dt>
                 <dd className="mt-2 text-[13px] text-secondary">{s.label}</dd>
@@ -33,18 +42,18 @@ export default function About() {
             <Pin width={18} height={18} strokeWidth={1.6} className="mt-0.5 shrink-0 text-secondary" />
             <div>
               <p className="text-[16px] font-medium">
-                {contact.address}, {contact.city}
+                {sajt.street}, {sajt.city}
               </p>
               <p className="mt-0.5 text-[14px] text-secondary">
-                <a href={contact.phoneHref} className="hover:text-primary">{contact.phone}</a>
+                <a href={sajt.phoneHref} className="hover:text-primary">{sajt.phone}</a>
                 <Razdvajac />
-                <a href={`mailto:${contact.email}`} className="hover:text-primary">{contact.email}</a>
+                <a href={`mailto:${sajt.email}`} className="hover:text-primary">{sajt.email}</a>
               </p>
             </div>
           </div>
 
           <div className="mt-auto flex flex-wrap items-center gap-3 pt-8 md:gap-4 md:pt-10">
-            <a href={mapsHref} target="_blank" rel="noreferrer" className="btn-primary">
+            <a href={sajt.mapsHref} target="_blank" rel="noreferrer" className="btn-primary">
               Kako do nas
             </a>
             <Link href="/o-nama/" className="btn-secondary">
@@ -60,10 +69,10 @@ export default function About() {
             <div>
               <p className="kicker">Radno vreme</p>
               <ul className="mt-1.5 space-y-0.5 text-[14px]">
-                {contact.hours.map((h) => (
+                {sajt.hours.map((h) => (
                   <li key={h.days} className="flex justify-between gap-6">
                     <span className="text-secondary">{h.days}</span>
-                    <span className="font-medium">{h.time}</span>
+                    <span className="font-medium">{h.hours}</span>
                   </li>
                 ))}
               </ul>
